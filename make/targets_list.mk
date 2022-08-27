@@ -44,12 +44,14 @@ UNSUPPORTED_TARGETS := \
     X_RACERSPI
 
 UNIFIED_TARGETS := STM32F405 \
-	STM32F411 \
+	STM32F401 \
+    STM32F411 \
 	STM32F7X2 \
 	STM32F745 \
 	STM32G47X \
 	STM32H743 \
-	STM32F411SX1280
+	STM32F411SX1280 \
+    OBALF411
 
 # Legacy targets are targets that have been replaced by Unified Target configurations
 LEGACY_TARGETS := MATEKF405 \
