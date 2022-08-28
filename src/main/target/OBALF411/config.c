@@ -17,27 +17,35 @@
  *
  * If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "platform.h"
-
-#ifdef USE_TARGET_CONFIG
-
-#include "flight/mixer.h"
-#include "io/serial.h"
-#include "pg/pinio.h"
+#include "drivers/serial.h"
+#include "pg/rx.h"
+#include "pg/piniobox.h"
+#include "rx/rx.h"
+#include "telemetry/telemetry.h"
+#include "config/config.h"
+#include "drivers/pwm_output.h"
+#include "sensors/gyro.h"
+#include "io/vtx.h"
+#include "io/ledstrip.h"
+#include "config/config.h"
 #include "pg/piniobox.h"
 #include "pg/motor.h"
-#include "target.h"
+#include "common/axis.h"
+#include "sensors/barometer.h"
+#include "sensors/compass.h"
+#include "sensors/gyro.h"
+#include "flight/mixer.h"
+#include "flight/pid.h"
+#include "drivers/pwm_output.h"
 
-#include "config_helper.h"
-
-
+#ifdef USE_TARGET_CONFIG
 
 void targetConfiguration(void)
 {
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_STANDARD;
 }
-
 #endif

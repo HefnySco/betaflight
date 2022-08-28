@@ -20,15 +20,8 @@ RX_SRC = \
     drivers/rx/rx_sx1280.c \
 
 
-ifeq ($(TARGET), OBALF411)
 F411_TARGETS += $(TARGET)
-endif
-
-ifeq ($(TARGET), STM32G47X)
-FEATURES       += VCP SDCARD_SPI ONBOARDFLASH
-else
 FEATURES       += VCP SDCARD_SPI SDCARD_SDIO ONBOARDFLASH
-endif
 
 TARGET_SRC = \
 	$(addprefix drivers/accgyro/,$(notdir $(wildcard $(SRC_DIR)/drivers/accgyro/*.c))) \

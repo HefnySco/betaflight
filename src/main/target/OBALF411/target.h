@@ -19,11 +19,13 @@
  */
 
 #pragma once
+#define TARGET_BOARD_IDENTIFIER "OBALF411"
+#define USBD_PRODUCT_STRING     "Betaflight OBAL"
 
-#if defined(OBALF411)
+#define LED0_PIN                PC13
+
 #undef USE_CAMERA_CONTROL
 #undef LED_STRIP
-#undef DEFAULT_VOLTAGE_METER_SOURCE
 #undef DEFAULT_CURRENT_METER_SOURCE
 
 
@@ -31,13 +33,13 @@
 #define USE_ADC
 #define ADC_INSTANCE         ADC1  
 #define ADC1_DMA_OPT            0  // DMA 2 Stream 0 Channel 0 
-#define VBAT_ADC_PIN            PA0
+#define VBAT_ADC_PIN            PA1
 //#define CURRENT_METER_ADC_PIN   PA1
 //#define RSSI_ADC_PIN     
-//#define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
+#define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
 
-//#undef USE_PPM
-//#undef USE_PWM
+#define USE_PPM
+#define USE_PWM
 #undef USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
 #undef USE_SERIALRX_SBUS       // Frsky and Futaba receivers
 #undef USE_SERIALRX_SPEKTRUM   // SRXL, DSM2 and DSMX protocol
@@ -46,11 +48,9 @@
 #undef USE_SERIALRX_XBUS       // JR
 
 
-#define LED0_PIN                PC13
 
-#define TARGET_BOARD_IDENTIFIER "OBALF411"
 
-#define USBD_PRODUCT_STRING     "Betaflight OBAL"
+
 
 #define USE_I2C_DEVICE_1
 //#define USE_I2C_DEVICE_2
@@ -80,9 +80,6 @@
 
 
 
-//#define USE_SPI_DEVICE_1
-//#define USE_SPI_DEVICE_2
-//#define USE_SPI_DEVICE_3
 
 #define TARGET_IO_PORTA 0xffff
 #define TARGET_IO_PORTB 0xffff
@@ -90,11 +87,6 @@
 #define TARGET_IO_PORTD 0xffff
 #define TARGET_IO_PORTE 0xffff
 
-#elif !defined(UNIT_TEST)
-
-#error "No resources defined for this Unified Target."
-
-#endif
 
 // Treat the target as unified, and expect manufacturer id / board name
 // to be supplied when the board is configured for the first time
@@ -199,12 +191,13 @@
 #define USE_USB_DETECT
 
 
+//#define ENABLE_DSHOT_DMAR       DSHOT_DMAR_ON
 
-#define USE_CUSTOM_DEFAULTS
+//#define USE_CUSTOM_DEFAULTS
 
 #define USE_TIMER
 #define USE_PWM_OUTPUT
 #define USE_MOTOR
 
 #define USABLE_TIMER_CHANNEL_COUNT 8
-#define USED_TIMERS             (TIM_N(2)|TIM_N(3)|TIM_N(4)|TIM_N(5))
+#define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3)|TIM_N(4)|TIM_N(5))
