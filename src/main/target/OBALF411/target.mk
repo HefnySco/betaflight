@@ -1,27 +1,6 @@
-#HSE_VALUE    = 25000000
-
-RX_SRC = \
-    rx/cc2500_common.c \
-    rx/cc2500_frsky_shared.c \
-    rx/cc2500_frsky_d.c \
-    rx/cc2500_frsky_x.c \
-    rx/cc2500_sfhss.c \
-    rx/cc2500_redpine.c \
-    rx/a7105_flysky.c \
-    rx/cyrf6936_spektrum.c \
-    drivers/rx/expresslrs_driver.c \
-    rx/expresslrs.c \
-    rx/expresslrs_common.c \
-    rx/expresslrs_telemetry.c \
-    drivers/rx/rx_cc2500.c \
-    drivers/rx/rx_a7105.c \
-    drivers/rx/rx_cyrf6936.c \
-    drivers/rx/rx_sx127x.c \
-    drivers/rx/rx_sx1280.c \
-
-
-F411_TARGETS += $(TARGET)
-FEATURES       += VCP SDCARD_SPI SDCARD_SDIO ONBOARDFLASH
+HSE_VALUE    = 25000000
+F411_TARGETS    += $(TARGET)
+FEATURES        += VCP ONBOARDFLASH
 
 TARGET_SRC = \
 	$(addprefix drivers/accgyro/,$(notdir $(wildcard $(SRC_DIR)/drivers/accgyro/*.c))) \
