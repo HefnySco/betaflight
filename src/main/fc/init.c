@@ -95,6 +95,7 @@
 #include "flight/failsafe.h"
 #include "flight/imu.h"
 #include "flight/mixer.h"
+#include "flight/gps_rescue.h"
 #include "flight/pid.h"
 #include "flight/pid_init.h"
 #include "flight/servos.h"
@@ -117,6 +118,7 @@
 #include "io/transponder_ir.h"
 #include "io/vtx.h"
 #include "io/vtx_control.h"
+#include "io/vtx_msp.h"
 #include "io/vtx_rtc6705.h"
 #include "io/vtx_smartaudio.h"
 #include "io/vtx_tramp.h"
@@ -765,6 +767,7 @@ void init(void)
 #ifdef USE_GPS
     if (featureIsEnabled(FEATURE_GPS)) {
         gpsInit();
+        gpsRescueInit();
     }
 #endif
 
@@ -827,6 +830,7 @@ void init(void)
 #ifdef USE_BARO
     baroStartCalibration();
 #endif
+    positionInit();
 
 #if defined(USE_VTX_COMMON) || defined(USE_VTX_CONTROL)
     vtxTableInit();
@@ -837,6 +841,10 @@ void init(void)
 
 #if defined(USE_VTX_COMMON)
     vtxCommonInit();
+#endif
+
+#ifdef USE_VTX_MSP
+    vtxMspInit();
 #endif
 
 #ifdef USE_VTX_SMARTAUDIO

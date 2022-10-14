@@ -20,8 +20,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
-
 #include <math.h>
 
 #include "platform.h"
@@ -411,7 +411,7 @@ void processRcStickPositions()
 }
 
 int32_t getRcStickDeflection(int32_t axis, uint16_t midrc) {
-    return MIN(ABS(rcData[axis] - midrc), 500);
+    return MIN(abs((int32_t)rcData[axis] - midrc), 500);
 }
 
 void rcControlsInit(void)

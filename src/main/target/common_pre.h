@@ -237,6 +237,8 @@ extern uint8_t _dmaram_end__;
 #define USE_SERIAL_PASSTHROUGH
 #define USE_GYRO_REGISTER_DUMP  // Adds gyroregisters command to cli to dump configured register values
 #define USE_IMU_CALC
+
+#if (!defined(CLOUD_BUILD))
 #define USE_PPM
 #define USE_SERIAL_RX
 #define USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
@@ -245,10 +247,14 @@ extern uint8_t _dmaram_end__;
 #define USE_SERIALRX_SBUS       // Frsky and Futaba receivers
 #define USE_SERIALRX_SPEKTRUM   // SRXL, DSM2 and DSMX protocol
 #define USE_SERIALRX_SUMD       // Graupner Hott protocol
+#endif
 
-#if (TARGET_FLASH_SIZE > 128)
+#if (TARGET_FLASH_SIZE > 256)
+#define PID_PROFILE_COUNT 4
+#define CONTROL_RATE_PROFILE_COUNT  4
+#elif (TARGET_FLASH_SIZE > 128)
 #define PID_PROFILE_COUNT 3
-#define CONTROL_RATE_PROFILE_COUNT  6
+#define CONTROL_RATE_PROFILE_COUNT  4
 #else
 #define PID_PROFILE_COUNT 2
 #define CONTROL_RATE_PROFILE_COUNT  3
@@ -261,19 +267,24 @@ extern uint8_t _dmaram_end__;
 #define USE_RESOURCE_MGMT
 #define USE_RUNAWAY_TAKEOFF     // Runaway Takeoff Prevention (anti-taz)
 #define USE_SERVOS
+#if (!defined(CLOUD_BUILD))
 #define USE_TELEMETRY
 #define USE_TELEMETRY_FRSKY_HUB
 #define USE_TELEMETRY_SMARTPORT
+#endif
 #endif
 
 #if (TARGET_FLASH_SIZE > 128)
 #define USE_GYRO_OVERFLOW_CHECK
 #define USE_YAW_SPIN_RECOVERY
 #define USE_DSHOT_DMAR
+
+#if (!defined(CLOUD_BUILD))
 #define USE_SERIALRX_FPORT      // FrSky FPort
 #define USE_TELEMETRY_CRSF
 #define USE_TELEMETRY_GHST
 #define USE_TELEMETRY_SRXL
+#endif
 
 #if ((TARGET_FLASH_SIZE > 256 && !defined(FEATURE_CUT_LEVEL)) || (FEATURE_CUT_LEVEL < 12))
 #define USE_CMS
@@ -288,6 +299,7 @@ extern uint8_t _dmaram_end__;
 #define USE_VTX_CONTROL
 #define USE_VTX_SMARTAUDIO
 #define USE_VTX_TRAMP
+#define USE_VTX_MSP
 #endif
 
 #if ((TARGET_FLASH_SIZE > 256 && !defined(FEATURE_CUT_LEVEL)) || (FEATURE_CUT_LEVEL < 10))
@@ -345,10 +357,12 @@ extern uint8_t _dmaram_end__;
 #endif
 
 #if ((TARGET_FLASH_SIZE > 256 && !defined(FEATURE_CUT_LEVEL)) || (FEATURE_CUT_LEVEL < 2))
+#if (!defined(CLOUD_BUILD))
 #define USE_TELEMETRY_HOTT
 #define USE_TELEMETRY_LTM
 #define USE_SERIALRX_SUMH       // Graupner legacy protocol
 #define USE_SERIALRX_XBUS       // JR
+#endif
 #endif
 
 #if ((TARGET_FLASH_SIZE > 256 && !defined(FEATURE_CUT_LEVEL)) || (FEATURE_CUT_LEVEL < 1))
@@ -378,11 +392,6 @@ extern uint8_t _dmaram_end__;
 #define USE_MULTI_GYRO
 #define USE_OSD_ADJUSTMENTS
 #define USE_SENSOR_NAMES
-#define USE_SERIALRX_JETIEXBUS
-#define USE_TELEMETRY_IBUS
-#define USE_TELEMETRY_IBUS_EXTENDED
-#define USE_TELEMETRY_JETIEXBUS
-#define USE_TELEMETRY_MAVLINK
 #define USE_UNCOMMON_MIXERS
 #define USE_SIGNATURE
 #define USE_ABSOLUTE_CONTROL
@@ -399,7 +408,6 @@ extern uint8_t _dmaram_end__;
 #define USE_VTX_TABLE
 #define USE_PERSISTENT_STATS
 #define USE_PROFILE_NAMES
-#define USE_SERIALRX_SRXL2     // Spektrum SRXL2 protocol
 #define USE_FEEDFORWARD
 #define USE_CUSTOM_BOX_NAMES
 #define USE_BATTERY_VOLTAGE_SAG_COMPENSATION
@@ -408,6 +416,15 @@ extern uint8_t _dmaram_end__;
 #define USE_RX_LINK_UPLINK_POWER
 #define USE_CRSF_V3
 #define USE_CRAFTNAME_MSGS
+
+#if (!defined(CLOUD_BUILD))
+#define USE_SERIALRX_JETIEXBUS
+#define USE_TELEMETRY_IBUS
+#define USE_TELEMETRY_IBUS_EXTENDED
+#define USE_TELEMETRY_JETIEXBUS
+#define USE_TELEMETRY_MAVLINK
+#define USE_SERIALRX_SRXL2     // Spektrum SRXL2 protocol
+#endif
 #endif
 
 #if (TARGET_FLASH_SIZE > 512)
@@ -417,4 +434,5 @@ extern uint8_t _dmaram_end__;
 #define USE_EMFAT_AUTORUN
 #define USE_EMFAT_ICON
 #define USE_GPS_PLUS_CODES
+#define USE_BATTERY_CONTINUE
 #endif

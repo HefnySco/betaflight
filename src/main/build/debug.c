@@ -95,6 +95,7 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "D_LPF",
     "VTX_TRAMP",
     "GHST",
+    "GHST_MSP",
     "SCHEDULER_DETERMINISM",
     "TIMING_ACCURACY",
     "RX_EXPRESSLRS_SPI",
@@ -104,4 +105,5 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "GPS_RESCUE_HEADING",
     "GPS_RESCUE_TRACKING",
     "ATTITUDE",
+    "VTX_MSP"
 };

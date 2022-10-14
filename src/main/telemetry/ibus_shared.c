@@ -139,7 +139,8 @@ static uint8_t getSensorID(ibusAddress_t address)
 }
 
 #if defined(USE_TELEMETRY_IBUS_EXTENDED)
-static const uint8_t* getSensorStruct(uint8_t sensorType, uint8_t* itemCount){
+static const uint8_t* getSensorStruct(uint8_t sensorType, uint8_t* itemCount)
+{
     const uint8_t* structure = 0;
     if (sensorType == IBUS_SENSOR_TYPE_GPS_FULL) {
         structure = FULL_GPS_IDS;
@@ -306,8 +307,9 @@ static bool setGPS(uint8_t sensorType, ibusTelemetry_s* value)
 
     uint16_t gpsFixType = 0;
     uint16_t sats = 0;
+    uint8_t minSats = gpsConfig()->gpsMinimumSats;
     if (sensors(SENSOR_GPS)) {
-        gpsFixType = !STATE(GPS_FIX) ? 1 : (gpsSol.numSat < 5 ? 2 : 3);
+        gpsFixType = !STATE(GPS_FIX) ? 1 : (gpsSol.numSat < minSats ? 2 : 3);
         sats = gpsSol.numSat;
         if (STATE(GPS_FIX) || sensorType == IBUS_SENSOR_TYPE_GPS_STATUS) {
             result = true;

@@ -61,6 +61,7 @@ extern "C" {
     PG_REGISTER(failsafeConfig_t, failsafeConfig, PG_FAILSAFE_CONFIG, 0);
     PG_REGISTER(motorConfig_t, motorConfig, PG_MOTOR_CONFIG, 0);
     PG_REGISTER(imuConfig_t, imuConfig, PG_IMU_CONFIG, 0);
+    PG_REGISTER(gpsConfig_t, gpsConfig, PG_GPS_CONFIG, 0);
 
     float rcCommand[4];
     float rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];
@@ -136,7 +137,7 @@ extern "C" {
     void blackboxFinish(void) {}
     bool accIsCalibrationComplete(void) { return true; }
     bool accHasBeenCalibrated(void) { return true; }
-    bool baroIsCalibrationComplete(void) { return true; }
+    bool baroIsCalibrated(void) { return true; }
     bool gyroIsCalibrationComplete(void) { return gyroCalibDone; }
     void gyroStartCalibration(bool) {}
     bool isFirstArmingGyroCalibrationRunning(void) { return false; }

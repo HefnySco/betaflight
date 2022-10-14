@@ -100,6 +100,7 @@ extern "C" {
     uint16_t simulationBatteryVoltage;
     uint32_t simulationBatteryAmperage;
     uint32_t simulationMahDrawn;
+    float simulationWhDrawn;
     int32_t simulationAltitude;
     int32_t simulationVerticalSpeed;
     uint16_t simulationCoreTemperature;
@@ -128,6 +129,7 @@ void setDefaultSimulationState()
     simulationBatteryVoltage = 1680;
     simulationBatteryAmperage = 0;
     simulationMahDrawn = 0;
+    simulationWhDrawn = 0;
     simulationAltitude = 0;
     simulationVerticalSpeed = 0;
     simulationCoreTemperature = 0;
@@ -188,7 +190,8 @@ void doTestArm(bool testEmpty = true)
 /*
  * Auxiliary function. Test is there're stats that must be shown
  */
-bool isSomeStatEnabled(void) {
+bool isSomeStatEnabled(void)
+{
     return (osdConfigMutable()->enabled_stats != 0);
 }
 
@@ -1190,6 +1193,8 @@ TEST_F(OsdTest, TestGpsElements)
 {
     // given
     osdElementConfigMutable()->item_pos[OSD_GPS_SATS] = OSD_POS(2, 4) | OSD_PROFILE_1_FLAG;
+    gpsConfigMutable()->gpsMinimumSats = GPS_MINIMUM_SAT_COUNT;
+    gpsConfigMutable()->gpsRequiredSats = GPS_REQUIRED_SAT_COUNT;
 
     sensorsSet(SENSOR_GPS);
     osdAnalyzeActiveElements();
@@ -1320,6 +1325,10 @@ extern "C" {
 
     int32_t getMAhDrawn() {
         return simulationMahDrawn;
+    }
+
+    float getWhDrawn() {
+        return simulationWhDrawn;
     }
 
     int32_t getEstimatedAltitudeCm() {

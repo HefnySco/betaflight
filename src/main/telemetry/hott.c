@@ -218,7 +218,7 @@ void hottPrepareGPSResponse(HOTT_GPS_MSG_t *hottGPSMessage)
         return;
     }
 
-    if (gpsSol.numSat >= 5) {
+    if (gpsSol.numSat >= gpsConfig()->gpsMinimumSats) {
         hottGPSMessage->gps_fix_char = GPS_FIX_CHAR_3D;
     } else {
         hottGPSMessage->gps_fix_char = GPS_FIX_CHAR_2D;
@@ -453,7 +453,8 @@ static inline void hottSendEAMResponse(void)
     hottSendResponse((uint8_t *)&hottEAMMessage, sizeof(hottEAMMessage));
 }
 
-static void hottPrepareMessages(void) {
+static void hottPrepareMessages(void)
+{
     hottPrepareEAMResponse(&hottEAMMessage);
 #ifdef USE_GPS
     hottPrepareGPSResponse(&hottGPSMessage);
@@ -630,7 +631,8 @@ static void hottCheckSerialData(uint32_t currentMicros)
 #endif
 }
 
-static void hottSendTelemetryData(void) {
+static void hottSendTelemetryData(void)
+{
 
     if (!hottIsSending) {
         hottConfigurePortForTX();

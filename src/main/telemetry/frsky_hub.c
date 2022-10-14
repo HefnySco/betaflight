@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "platform.h"
 
@@ -44,6 +45,7 @@
 #include "drivers/sensor.h"
 #include "drivers/serial.h"
 #include "drivers/time.h"
+#include "drivers/dshot.h"
 
 #include "config/config.h"
 #include "fc/rc_controls.h"
@@ -189,7 +191,7 @@ static void sendThrottleOrBatterySizeAsRpm(void)
 #if defined(USE_ESC_SENSOR_TELEMETRY)
     escSensorData_t *escData = getEscSensorData(ESC_SENSOR_COMBINED);
     if (escData) {
-        data = escData->dataAge < ESC_DATA_INVALID ? (calcEscRpm(escData->rpm) / 10) : 0;
+        data = escData->dataAge < ESC_DATA_INVALID ? (erpmToRpm(escData->rpm) / 10) : 0;
     }
 #else
     if (ARMING_FLAG(ARMED)) {
@@ -240,7 +242,7 @@ static void GPStoDDDMM_MMMM(int32_t mwiigps, gpsCoordinateDDDMMmmmm_t *result)
 {
     int32_t absgps, deg, min;
 
-    absgps = ABS(mwiigps);
+    absgps = abs(mwiigps);
     deg    = absgps / GPS_DEGREES_DIVIDER;
     absgps = (absgps - deg * GPS_DEGREES_DIVIDER) * 60;        // absgps = Minutes left * 10^7
     min    = absgps / GPS_DEGREES_DIVIDER;                     // minutes left

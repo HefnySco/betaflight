@@ -127,7 +127,7 @@ static const gpsInitData_t gpsInitData[] = {
     { GPS_BAUDRATE_9600,      BAUD_9600, "$PUBX,41,1,0003,0001,9600,0*16\r\n", "" }
 };
 
-#define GPS_INIT_DATA_ENTRY_COUNT (sizeof(gpsInitData) / sizeof(gpsInitData[0]))
+#define GPS_INIT_DATA_ENTRY_COUNT ARRAYLEN(gpsInitData)
 
 #define DEFAULT_BAUD_RATE_INDEX 0
 
@@ -273,10 +273,10 @@ typedef enum {
 
 gpsData_t gpsData;
 
-PG_REGISTER_WITH_RESET_TEMPLATE(gpsConfig_t, gpsConfig, PG_GPS_CONFIG, 0);
+PG_REGISTER_WITH_RESET_TEMPLATE(gpsConfig_t, gpsConfig, PG_GPS_CONFIG, 1);
 
 PG_RESET_TEMPLATE(gpsConfig_t, gpsConfig,
-    .provider = GPS_NMEA,
+    .provider = GPS_UBLOX,
     .sbasMode = SBAS_NONE,
     .autoConfig = GPS_AUTOCONFIG_ON,
     .autoBaud = GPS_AUTOBAUD_OFF,
@@ -284,7 +284,9 @@ PG_RESET_TEMPLATE(gpsConfig_t, gpsConfig,
     .gps_ublox_mode = UBLOX_AIRBORNE,
     .gps_set_home_point_once = false,
     .gps_use_3d_speed = false,
-    .sbas_integrity = false
+    .sbas_integrity = false,
+    .gpsRequiredSats = GPS_REQUIRED_SAT_COUNT,
+    .gpsMinimumSats = GPS_MINIMUM_SAT_COUNT
 );
 
 static void shiftPacketLog(void)
@@ -296,7 +298,8 @@ static void shiftPacketLog(void)
     }
 }
 
-static bool isConfiguratorConnected() {
+static bool isConfiguratorConnected()
+{
     return (getArmingDisableFlags() & ARMING_DISABLED_MSP);
 }
 
@@ -471,7 +474,8 @@ static void ubloxSendPollMessage(uint8_t msg_id)
     ubloxSendMessage((const uint8_t *) &tx_buffer, 6);
 }
 
-static void ubloxSendNAV5Message(bool airborne) {
+static void ubloxSendNAV5Message(bool airborne)
+{
     ubx_message tx_buffer;
     tx_buffer.payload.cfg_nav5.mask = 0xFFFF;
     if (airborne) {
@@ -509,7 +513,8 @@ static void ubloxSendNAV5Message(bool airborne) {
     ubloxSendConfigMessage(&tx_buffer, MSG_CFG_NAV_SETTINGS, sizeof(ubx_cfg_nav5));
 }
 
-static void ubloxSetMessageRate(uint8_t messageClass, uint8_t messageID, uint8_t rate) {
+static void ubloxSetMessageRate(uint8_t messageClass, uint8_t messageID, uint8_t rate)
+{
     ubx_message tx_buffer;
     tx_buffer.payload.cfg_msg.msgClass = messageClass;
     tx_buffer.payload.cfg_msg.msgID = messageID;
@@ -517,7 +522,8 @@ static void ubloxSetMessageRate(uint8_t messageClass, uint8_t messageID, uint8_t
     ubloxSendConfigMessage(&tx_buffer, MSG_CFG_MSG, sizeof(ubx_cfg_msg));
 }
 
-static void ubloxSetNavRate(uint16_t measRate, uint16_t navRate, uint16_t timeRef) {
+static void ubloxSetNavRate(uint16_t measRate, uint16_t navRate, uint16_t timeRef)
+{
     ubx_message tx_buffer;
     tx_buffer.payload.cfg_rate.measRate = measRate;
     tx_buffer.payload.cfg_rate.navRate = navRate;
@@ -525,7 +531,8 @@ static void ubloxSetNavRate(uint16_t measRate, uint16_t navRate, uint16_t timeRe
     ubloxSendConfigMessage(&tx_buffer, MSG_CFG_RATE, sizeof(ubx_cfg_rate));
 }
 
-static void ubloxSetSbas() {
+static void ubloxSetSbas()
+{
     ubx_message tx_buffer;
 
     //NOTE: default ublox config for sbas mode is: UBLOX_MODE_ENABLED, test is disabled
@@ -681,7 +688,7 @@ void gpsInitUblox(void)
                         }
                         break;
                     case 12:
-                        ubloxSetNavRate(0xC8, 1, 1); // set rate to 5Hz (measurement period: 200ms, navigation rate: 1 cycle)
+                        ubloxSetNavRate(0x64, 1, 1); // set rate to 10Hz (measurement period: 100ms, navigation rate: 1 cycle) (for 5Hz use 0xC8)
                         break;
                     case 13:
                         ubloxSetSbas();
@@ -757,7 +764,7 @@ void gpsInitHardware(void)
 static void updateGpsIndicator(timeUs_t currentTimeUs)
 {
     static uint32_t GPSLEDTime;
-    if ((int32_t)(currentTimeUs - GPSLEDTime) >= 0 && (gpsSol.numSat >= 5)) {
+    if ((int32_t)(currentTimeUs - GPSLEDTime) >= 0 && STATE(GPS_FIX) && (gpsSol.numSat >= gpsConfig()->gpsRequiredSats)) {
         GPSLEDTime = currentTimeUs + 150000;
         LED1_TOGGLE;
     }
@@ -867,18 +874,15 @@ void gpsUpdate(timeUs_t currentTimeUs)
         DISABLE_STATE(GPS_FIX_HOME);
     }
 
-    uint8_t minSats = 5;
-
 #if defined(USE_GPS_RESCUE)
     if (gpsRescueIsConfigured()) {
         updateGPSRescueState();
-        minSats = gpsRescueConfig()->minSats;
     }
 #endif
 
     static bool hasFix = false;
-    if (STATE(GPS_FIX)) {
-        if (gpsIsHealthy() && gpsSol.numSat >= minSats && !hasFix) {
+    if (STATE(GPS_FIX_HOME)) {
+        if (gpsIsHealthy() && gpsSol.numSat >= gpsConfig()->gpsRequiredSats && !hasFix) {
             // ready beep sequence on fix or requirements for gps rescue met.
             beeper(BEEPER_READY_BEEP);
             hasFix = true;
@@ -1804,11 +1808,12 @@ static void GPS_calculateDistanceFlownVerticalSpeed(bool initialize)
 void GPS_reset_home_position(void)
 {
     if (!STATE(GPS_FIX_HOME) || !gpsConfig()->gps_set_home_point_once) {
-        if (STATE(GPS_FIX) && gpsSol.numSat >= 5) {
+        if (STATE(GPS_FIX) && gpsSol.numSat >= gpsConfig()->gpsRequiredSats) {
+            // requires the full sat count to say we have a home fix
             GPS_home[GPS_LATITUDE] = gpsSol.llh.lat;
             GPS_home[GPS_LONGITUDE] = gpsSol.llh.lon;
-            GPS_calc_longitude_scaling(gpsSol.llh.lat); // need an initial value for distance and bearing calc
-            // Set ground altitude
+            GPS_calc_longitude_scaling(gpsSol.llh.lat);
+            // need an initial value for distance and bearing calcs, and to set ground altitude
             ENABLE_STATE(GPS_FIX_HOME);
         }
     }
@@ -1833,7 +1838,7 @@ void GPS_distance_cm_bearing(int32_t *currentLat1, int32_t *currentLon1, int32_t
 
 void GPS_calculateDistanceAndDirectionToHome(void)
 {
-    if (STATE(GPS_FIX_HOME)) {      // If we don't have home set, do not display anything
+    if (STATE(GPS_FIX_HOME)) {
         uint32_t dist;
         int32_t dir;
         GPS_distance_cm_bearing(&gpsSol.llh.lat, &gpsSol.llh.lon, &GPS_home[GPS_LATITUDE], &GPS_home[GPS_LONGITUDE], &dist, &dir);
@@ -1841,6 +1846,7 @@ void GPS_calculateDistanceAndDirectionToHome(void)
         GPS_distanceToHomeCm = dist; // cm/sec
         GPS_directionToHome = dir / 10; // degrees * 10 or decidegrees
     } else {
+        // If we don't have home set, do not display anything
         GPS_distanceToHome = 0;
         GPS_distanceToHomeCm = 0;
         GPS_directionToHome = 0;
@@ -1849,7 +1855,8 @@ void GPS_calculateDistanceAndDirectionToHome(void)
 
 void onGpsNewData(void)
 {
-    if (!(STATE(GPS_FIX) && gpsSol.numSat >= 5)) {
+    if (!(STATE(GPS_FIX) && gpsSol.numSat >= gpsConfig()->gpsMinimumSats)) {
+        // if we don't have a 3D fix and the minimum sats, don't give data to GPS rescue
         return;
     }
 
