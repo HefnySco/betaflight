@@ -17,35 +17,24 @@
  *
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "platform.h"
-#include "drivers/serial.h"
-#include "pg/rx.h"
-#include "pg/piniobox.h"
-#include "rx/rx.h"
-#include "telemetry/telemetry.h"
-#include "config/config.h"
-#include "drivers/pwm_output.h"
-#include "sensors/gyro.h"
-#include "io/vtx.h"
-#include "io/ledstrip.h"
-#include "config/config.h"
-#include "pg/piniobox.h"
-#include "pg/motor.h"
-#include "common/axis.h"
-#include "sensors/barometer.h"
-#include "sensors/compass.h"
-#include "sensors/gyro.h"
-#include "flight/mixer.h"
-#include "flight/pid.h"
-#include "drivers/pwm_output.h"
 
 #ifdef USE_TARGET_CONFIG
 
+#include "io/serial.h"
+
+#include "build/debug.h"
+
 void targetConfiguration(void)
 {
-    motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_STANDARD;
+    // SOFTSERIAL1 is ESC telemetry input
+    const int index = findSerialPortIndexByIdentifier(SERIAL_PORT_SOFTSERIAL1);
+    if (index >= 0) {
+        serialConfigMutable()->portConfigs[index].functionMask = FUNCTION_ESC_SENSOR;
+    }
 }
 #endif

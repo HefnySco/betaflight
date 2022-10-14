@@ -22,72 +22,59 @@
 #define TARGET_BOARD_IDENTIFIER "OBALF411"
 #define USBD_PRODUCT_STRING     "Betaflight OBAL"
 
+#define USE_TARGET_CONFIG
 #define LED0_PIN                PC13
 
-#undef USE_CAMERA_CONTROL
-#undef LED_STRIP
-#undef DEFAULT_CURRENT_METER_SOURCE
+
+#define INVERTER_PIN_UART2      PC14
+
+#define USE_ACC
+#define USE_ACC_SPI_MPU6500
+#define USE_ACC_SPI_MPU6000
+
+#define USE_GYRO
+#define USE_GYRO_SPI_MPU6500
+#define USE_GYRO_SPI_MPU6000
 
 
-// *************** ADC *****************************
-#define USE_ADC
-#define ADC_INSTANCE            ADC1  
-#define ADC1_DMA_OPT            0  // DMA 2 Stream 0 Channel 0 
-#define VBAT_ADC_PIN            PA1
-#define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
 
-#define USE_PPM
-#define USE_PWM
-#undef USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
-#undef USE_SERIALRX_SBUS       // Frsky and Futaba receivers
-#undef USE_SERIALRX_SPEKTRUM   // SRXL, DSM2 and DSMX protocol
-#undef USE_SERIALRX_SUMD       // Graupner Hott protocol
-#undef USE_SERIALRX_SUMH       // Graupner legacy protocol
-#undef USE_SERIALRX_XBUS       // JR
+// #define GYRO_1_EXTI_PIN         PA8
 
 
-#define USE_I2C_DEVICE_1
+// #define USE_BARO
+// #define USE_BARO_BMP280
+// #define USE_BARO_SPI_BMP280
+// #define BARO_SPI_INSTANCE       SPI2
+// #define BARO_CS_PIN             PA9
 
+// #define USE_MAX7456
+// #define MAX7456_SPI_INSTANCE    SPI2
+// #define MAX7456_SPI_CS_PIN      PA10
 
-// *************** UART *****************************
 #define USE_VCP
 #define USE_USB_DETECT
+//#define USB_DETECT_PIN   PC5
 
-
-#define USE_SOFTSERIAL1
-#define USE_SOFTSERIAL2
-//#define USE_INVERTER
 #define USE_UART1
-#define UART1_RX_PIN            PA10
-#define UART1_TX_PIN            PA9
+#define UART1_RX_PIN            PB7
+#define UART1_TX_PIN            PB6
 
 #define USE_UART2
 #define UART2_RX_PIN            PA3
 #define UART2_TX_PIN            PA2
-#define SERIAL_PORT_COUNT     5
 
+#define USE_SOFTSERIAL1
+#define SOFTSERIAL1_RX_PIN      PA2    // Backdoor timer on UART2_TX, used for ESC telemetry
+#define SOFTSERIAL1_TX_PIN      PA2    // Workaround for softserial not initializing with only RX
 
+#define USE_SOFTSERIAL2
+#define SOFTSERIAL2_RX_PIN      NONE
+#define SOFTSERIAL2_TX_PIN      NONE
 
+#define SERIAL_PORT_COUNT       5 //VCP, USART1, USART2, SOFTSERIAL1, SOFTSERIAL2
 
-#define TARGET_IO_PORTA 0xffff
-#define TARGET_IO_PORTB 0xffff
-#define TARGET_IO_PORTC 0xffff
-#define TARGET_IO_PORTD 0xffff
-#define TARGET_IO_PORTE 0xffff
-
-
-// Treat the target as unified, and expect manufacturer id / board name
-// to be supplied when the board is configured for the first time
-//#define USE_UNIFIED_TARGET    
-
-
-#define USE_RX_CC2500_SPI_PA_LNA
-#define USE_RX_CC2500_SPI_DIVERSITY
-
-
-#undef TELEMETRY_FRSKY
-#undef TELEMETRY_HOTT
-#undef TELEMETRY_LTM
+#define USE_ESCSERIAL
+#define ESCSERIAL_TIMER_TX_PIN  PB10
 
 #define USE_I2C
 #define USE_I2C_DEVICE_1
@@ -117,7 +104,12 @@
 #define SPI3_MISO_PIN           NONE
 #define SPI3_MOSI_PIN           NONE
 
+// #define USE_ADC
+// #define CURRENT_METER_ADC_PIN   NONE // PA6 Available from TP33
+// #define VBAT_ADC_PIN            PA5  // 11:1 (10K + 1K) divider
 
+// #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ESC
+// #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ESC
 #define USE_ACC
 #define USE_ACC_SPI_MPU9250
 
@@ -141,16 +133,20 @@
 #define USE_BARO_BMP085
 #endif
 
-#define USE_FLASHFS
-#define USE_FLASH_TOOLS
-#define USE_FLASH_M25P16
-#define USE_FLASH_W25N01G          // 1Gb NAND flash support
-#define USE_FLASH_W25M             // Stacked die support
-#define USE_FLASH_W25M512          // 512Kb (256Kb x 2 stacked) NOR flash support
-#define USE_FLASH_W25M02G          // 2Gb (1Gb x 2 stacked) NAND flash support
-#define USE_FLASH_W25Q128FV        // 16MB Winbond 25Q128
+#define SERIALRX_UART           SERIAL_PORT_USART2
+
+#define USE_TRANSPONDER
+
+#define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
+#define SERIALRX_PROVIDER       SERIALRX_SBUS
+
+#define DEFAULT_FEATURES        (FEATURE_OSD | FEATURE_SOFTSERIAL | FEATURE_ESC_SENSOR)
 
 #define USE_USB_DETECT
+
+#define TARGET_IO_PORTA (0xffff & ~(BIT(14)|BIT(13)))
+#define TARGET_IO_PORTB (0xffff & ~(BIT(2)|BIT(11)))
+#define TARGET_IO_PORTC (BIT(13)|BIT(14)|BIT(15))
 
 #define USE_TIMER
 #define USE_PWM_OUTPUT
