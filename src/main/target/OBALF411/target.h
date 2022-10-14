@@ -63,18 +63,18 @@
 #define UART2_RX_PIN            PA3
 #define UART2_TX_PIN            PA2
 
-#define USE_SOFTSERIAL1
-#define SOFTSERIAL1_RX_PIN      PA2    // Backdoor timer on UART2_TX, used for ESC telemetry
-#define SOFTSERIAL1_TX_PIN      PA2    // Workaround for softserial not initializing with only RX
+// #define USE_SOFTSERIAL1
+// #define SOFTSERIAL1_RX_PIN      NONE    
+// #define SOFTSERIAL1_TX_PIN      NONE    
 
-#define USE_SOFTSERIAL2
-#define SOFTSERIAL2_RX_PIN      NONE
-#define SOFTSERIAL2_TX_PIN      NONE
+// #define USE_SOFTSERIAL2
+// #define SOFTSERIAL2_RX_PIN      NONE
+// #define SOFTSERIAL2_TX_PIN      NONE
 
-#define SERIAL_PORT_COUNT       5 //VCP, USART1, USART2, SOFTSERIAL1, SOFTSERIAL2
+#define SERIAL_PORT_COUNT       3 //VCP, USART1, USART2, SOFTSERIAL1, SOFTSERIAL2
 
-#define USE_ESCSERIAL
-#define ESCSERIAL_TIMER_TX_PIN  PB10
+//#define USE_ESCSERIAL
+//#define ESCSERIAL_TIMER_TX_PIN  PB10
 
 #define USE_I2C
 #define USE_I2C_DEVICE_1
@@ -140,7 +140,7 @@
 #define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
 #define SERIALRX_PROVIDER       SERIALRX_SBUS
 
-#define DEFAULT_FEATURES        (FEATURE_OSD | FEATURE_SOFTSERIAL | FEATURE_ESC_SENSOR)
+//#define DEFAULT_FEATURES        (FEATURE_OSD | FEATURE_SOFTSERIAL | FEATURE_ESC_SENSOR)
 
 #define USE_USB_DETECT
 
