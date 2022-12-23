@@ -59,9 +59,9 @@
 #define UART1_RX_PIN            PB7
 #define UART1_TX_PIN            PB6
 
-#define USE_UART2
-#define UART2_RX_PIN            PA3
-#define UART2_TX_PIN            PA2
+// #define USE_UART2
+// #define UART2_RX_PIN            PA3
+// #define UART2_TX_PIN            PA2
 
 // #define USE_SOFTSERIAL1
 // #define SOFTSERIAL1_RX_PIN      NONE    
@@ -137,7 +137,7 @@
 
 #define USE_TRANSPONDER
 
-#define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
+#define DEFAULT_RX_FEATURE      FEATURE_RX_PARALLEL_PWM
 #define SERIALRX_PROVIDER       SERIALRX_SBUS
 
 //#define DEFAULT_FEATURES        (FEATURE_OSD | FEATURE_SOFTSERIAL | FEATURE_ESC_SENSOR)
@@ -149,6 +149,8 @@
 #define TARGET_IO_PORTC (BIT(13)|BIT(14)|BIT(15))
 
 #define USE_TIMER
+#define USE_PWM
+#define USE_PPM
 #define USE_PWM_OUTPUT
 #define USE_MOTOR
 
