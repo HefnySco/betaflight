@@ -25,7 +25,7 @@
 #include "drivers/rcc.h"
 
 #include "common/utils.h"
-
+//MHEFNY: IMPORTANT FILE to control IO PORTS.
 // io ports defs are stored in array by index now
 struct ioPortDef_s {
     rccPeriphTag_t rcc;
@@ -244,7 +244,7 @@ void IOToggle(IO_t io)
 
 // claim IO pin, set owner and resources
 void IOInit(IO_t io, resourceOwner_e owner, uint8_t index)
-{
+{   //MHEFNY: assign a resiurce to an OWNER and give it an index.
     if (!io) {
         return;
     }

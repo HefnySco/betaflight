@@ -73,6 +73,7 @@ void i2cHardwareConfigure(const i2cConfig_t *i2cConfig)
             pDev->reg = hardware->reg;
             pDev->pullUp = i2cConfig[device].pullUp;
             pDev->clockSpeed = i2cConfig[device].clockSpeed;
+            pDev->address = i2cConfig[device].address;
         }
     }
 }

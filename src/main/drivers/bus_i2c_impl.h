@@ -80,6 +80,7 @@ typedef struct i2cDevice_s {
 #endif
     bool pullUp;
     uint16_t clockSpeed;
+    uint8_t address;        //MHEFNY: if none zero then master.
 
     // MCU/Driver dependent member follows
 #if defined(STM32F4)

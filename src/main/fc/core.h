@@ -84,6 +84,7 @@ bool gyroFilterReady(void);
 bool pidLoopReady(void);
 void taskFiltering(timeUs_t currentTimeUs);
 void taskMainPidLoop(timeUs_t currentTimeUs);
+void taskMotors(timeUs_t currentTimeUs);
 
 bool isFlipOverAfterCrashActive(void);
 int8_t calculateThrottlePercent(void);

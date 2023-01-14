@@ -69,7 +69,11 @@ bool sensorsAutodetect(void)
 
     // gyro must be initialised before accelerometer
 
-    bool gyroDetected = gyroInit();
+    bool gyroDetected = true 
+    #ifdef USE_GYRO    
+    && gyroInit()
+    #endif
+    ;
 
 #ifdef USE_ACC
     if (gyroDetected) {

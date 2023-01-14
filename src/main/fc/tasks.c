@@ -46,6 +46,8 @@
 #include "drivers/usb_io.h"
 #include "drivers/vtx_common.h"
 
+#include "drivers/i2c_rcout.h"
+
 #include "config/config.h"
 #include "fc/core.h"
 #include "fc/rc.h"
@@ -153,6 +155,7 @@ static void taskHandleSerial(timeUs_t currentTimeUs)
     mspSerialProcess(evaluateMspData, mspFcProcessCommand, mspFcProcessReply);
 }
 
+#ifdef USE_BATTERY
 static void taskBatteryAlerts(timeUs_t currentTimeUs)
 {
     if (!ARMING_FLAG(ARMED)) {
@@ -162,6 +165,7 @@ static void taskBatteryAlerts(timeUs_t currentTimeUs)
     batteryUpdateStates(currentTimeUs);
     batteryUpdateAlarms();
 }
+#endif 
 
 #ifdef USE_ACC
 static void taskUpdateAccelerometer(timeUs_t currentTimeUs)
@@ -184,6 +188,7 @@ bool taskUpdateRxMainInProgress()
     return (rxState != RX_STATE_CHECK);
 }
 
+#ifdef USE_TASK_RX
 static void taskUpdateRxMain(timeUs_t currentTimeUs)
 {
     static timeDelta_t rxStateDurationFractionUs[RX_STATE_COUNT];
@@ -248,7 +253,7 @@ static void taskUpdateRxMain(timeUs_t currentTimeUs)
 
     schedulerSetNextStateTime(rxStateDurationFractionUs[rxState] >> RX_TASK_DECAY_SHIFT);
 }
-
+#endif
 
 #ifdef USE_BARO
 static void taskUpdateBaro(timeUs_t currentTimeUs)
@@ -277,6 +282,16 @@ static void taskUpdateMag(timeUs_t currentTimeUs)
     }
 }
 #endif
+
+#if defined (USE_I2C_RCOUT)
+void taskUpdateI2CRcout(timeUs_t currentTimeUs)
+{
+    UNUSED(currentTimeUs);
+
+    i2c_rcout_execute();
+}
+#endif
+
 
 #if defined(USE_RANGEFINDER)
 void taskUpdateRangefinder(timeUs_t currentTimeUs)
@@ -355,9 +370,13 @@ task_attribute_t task_attributes[TASK_COUNT] = {
     [TASK_SYSTEM] = DEFINE_TASK("SYSTEM", "LOAD", NULL, taskSystemLoad, TASK_PERIOD_HZ(10), TASK_PRIORITY_MEDIUM_HIGH),
     [TASK_MAIN] = DEFINE_TASK("SYSTEM", "UPDATE", NULL, taskMain, TASK_PERIOD_HZ(1000), TASK_PRIORITY_MEDIUM_HIGH),
     [TASK_SERIAL] = DEFINE_TASK("SERIAL", NULL, NULL, taskHandleSerial, TASK_PERIOD_HZ(100), TASK_PRIORITY_LOW), // 100 Hz should be enough to flush up to 115 bytes @ 115200 baud
+
+//MHEFNY: NEW 
+#ifdef USE_BATTERY
     [TASK_BATTERY_ALERTS] = DEFINE_TASK("BATTERY_ALERTS", NULL, NULL, taskBatteryAlerts, TASK_PERIOD_HZ(5), TASK_PRIORITY_MEDIUM),
     [TASK_BATTERY_VOLTAGE] = DEFINE_TASK("BATTERY_VOLTAGE", NULL, NULL, batteryUpdateVoltage, TASK_PERIOD_HZ(SLOW_VOLTAGE_TASK_FREQ_HZ), TASK_PRIORITY_MEDIUM), // Freq may be updated in tasksInit
     [TASK_BATTERY_CURRENT] = DEFINE_TASK("BATTERY_CURRENT", NULL, NULL, batteryUpdateCurrentMeter, TASK_PERIOD_HZ(50), TASK_PRIORITY_MEDIUM),
+#endif
 
 #ifdef USE_TRANSPONDER
     [TASK_TRANSPONDER] = DEFINE_TASK("TRANSPONDER", NULL, NULL, transponderUpdate, TASK_PERIOD_HZ(250), TASK_PRIORITY_LOW),
@@ -366,19 +385,37 @@ task_attribute_t task_attributes[TASK_COUNT] = {
 #ifdef USE_STACK_CHECK
     [TASK_STACK_CHECK] = DEFINE_TASK("STACKCHECK", NULL, NULL, taskStackCheck, TASK_PERIOD_HZ(10), TASK_PRIORITY_LOWEST),
 #endif
-
+#ifdef USE_GYRO
     [TASK_GYRO] = DEFINE_TASK("GYRO", NULL, NULL, taskGyroSample, TASK_GYROPID_DESIRED_PERIOD, TASK_PRIORITY_REALTIME),
+#ifdef USE_TASK_FILTER
     [TASK_FILTER] = DEFINE_TASK("FILTER", NULL, NULL, taskFiltering, TASK_GYROPID_DESIRED_PERIOD, TASK_PRIORITY_REALTIME),
+#endif
+#ifdef USE_TASK_PID
     [TASK_PID] = DEFINE_TASK("PID", NULL, NULL, taskMainPidLoop, TASK_GYROPID_DESIRED_PERIOD, TASK_PRIORITY_REALTIME),
+#endif 
+#ifdef USE_TASK_MOTORS
+    [TASK_MOTORS] = DEFINE_TASK("MOTORS", NULL, NULL, taskMotors, TASK_PERIOD_HZ(1000), TASK_PRIORITY_HIGH),
+#endif
+
+#endif
 #ifdef USE_ACC
-    [TASK_ACCEL] = DEFINE_TASK("ACC", NULL, NULL, taskUpdateAccelerometer, TASK_PERIOD_HZ(1000), TASK_PRIORITY_MEDIUM),
+    [TASK_ACCEL] = DEFINE_TASK("ACC", NULL, NULL, taskUpdateAccelerometer, TASK_ACC_DESIRED_PERIOD, TASK_PRIORITY_MEDIUM),
+#ifdef USE_TASK_ATTITUDE
     [TASK_ATTITUDE] = DEFINE_TASK("ATTITUDE", NULL, NULL, imuUpdateAttitude, TASK_PERIOD_HZ(100), TASK_PRIORITY_MEDIUM),
 #endif
+#endif
+#ifdef USE_TASK_RX
     [TASK_RX] = DEFINE_TASK("RX", NULL, rxUpdateCheck, taskUpdateRxMain, TASK_PERIOD_HZ(33), TASK_PRIORITY_HIGH), // If event-based scheduling doesn't work, fallback to periodic scheduling
-    [TASK_DISPATCH] = DEFINE_TASK("DISPATCH", NULL, NULL, dispatchProcess, TASK_PERIOD_HZ(1000), TASK_PRIORITY_HIGH),
+#endif
+
+[TASK_DISPATCH] = DEFINE_TASK("DISPATCH", NULL, NULL, dispatchProcess, TASK_PERIOD_HZ(1000), TASK_PRIORITY_HIGH),
 
 #ifdef USE_BEEPER
     [TASK_BEEPER] = DEFINE_TASK("BEEPER", NULL, NULL, beeperUpdate, TASK_PERIOD_HZ(100), TASK_PRIORITY_LOW),
+#endif
+
+#ifdef USE_I2C_RCOUT
+    [TASK_I2CRCOUT] = DEFINE_TASK("I2CRCOUT", NULL, NULL, taskUpdateI2CRcout, TASK_PERIOD_HZ(10), TASK_PRIORITY_HIGH),
 #endif
 
 #ifdef USE_GPS
@@ -461,7 +498,7 @@ task_t *getTask(unsigned taskId)
 
 // Has to be done before tasksInit() in order to initialize any task data which may be uninitialized at boot
 void tasksInitData(void)
-{
+{   //MHEFNY: add predefined tasks in task list
     for (int i = 0; i < TASK_COUNT; i++) {
         tasks[i].attribute = &task_attributes[i];
     }
@@ -476,6 +513,7 @@ void tasksInit(void)
     setTaskEnabled(TASK_SERIAL, true);
     rescheduleTask(TASK_SERIAL, TASK_PERIOD_HZ(serialConfig()->serial_update_rate_hz));
 
+#ifdef USE_BATTERY
     const bool useBatteryVoltage = batteryConfig()->voltageMeterSource != VOLTAGE_METER_NONE;
     setTaskEnabled(TASK_BATTERY_VOLTAGE, useBatteryVoltage);
 
@@ -490,26 +528,39 @@ void tasksInit(void)
     setTaskEnabled(TASK_BATTERY_CURRENT, useBatteryCurrent);
     const bool useBatteryAlerts = batteryConfig()->useVBatAlerts || batteryConfig()->useConsumptionAlerts || featureIsEnabled(FEATURE_OSD);
     setTaskEnabled(TASK_BATTERY_ALERTS, (useBatteryVoltage || useBatteryCurrent) && useBatteryAlerts);
+#endif
 
 #ifdef USE_STACK_CHECK
     setTaskEnabled(TASK_STACK_CHECK, true);
 #endif
 
+#if defined(USE_GYRO)
     if (sensors(SENSOR_GYRO)) {
         rescheduleTask(TASK_GYRO, gyro.sampleLooptime);
-        rescheduleTask(TASK_FILTER, gyro.targetLooptime);
-        rescheduleTask(TASK_PID, gyro.targetLooptime);
         setTaskEnabled(TASK_GYRO, true);
+    #if defined (USE_TASK_FILTER)
+        rescheduleTask(TASK_FILTER, gyro.targetLooptime);
         setTaskEnabled(TASK_FILTER, true);
+    #endif
+    #if defined (USE_TASK_PID)
+        rescheduleTask(TASK_PID, gyro.targetLooptime);
         setTaskEnabled(TASK_PID, true);
+    #endif
+
         schedulerEnableGyro();
     }
-
+#endif
+#if defined (USE_TASK_MOTORS)
+    setTaskEnabled(TASK_MOTORS, true);
+#endif
 #if defined(USE_ACC)
     if (sensors(SENSOR_ACC) && acc.sampleRateHz) {
         setTaskEnabled(TASK_ACCEL, true);
         rescheduleTask(TASK_ACCEL, TASK_PERIOD_HZ(acc.sampleRateHz));
+    #if defined (USE_TASK_ATTITUDE)
         setTaskEnabled(TASK_ATTITUDE, true);
+    #endif
+
     }
 #endif
 
@@ -527,6 +578,10 @@ void tasksInit(void)
     setTaskEnabled(TASK_BEEPER, true);
 #endif
 
+#ifdef USE_I2C_RCOUT
+    setTaskEnabled(TASK_I2CRCOUT, true);
+#endif
+        
 #ifdef USE_GPS
     setTaskEnabled(TASK_GPS, featureIsEnabled(FEATURE_GPS));
 #endif

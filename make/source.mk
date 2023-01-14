@@ -31,7 +31,9 @@ COMMON_SRC = \
             drivers/dma_reqmap.c \
             drivers/exti.c \
             drivers/io.c \
+            drivers/i2c_rcout.c \
             drivers/light_led.c \
+            drivers/light_ledx.c \
             drivers/mco.c \
             drivers/motor.c \
             drivers/pinio.c \
@@ -307,6 +309,7 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             drivers/compass/compass_lis3mdl.c \
             drivers/display_ug2864hsweg01.c \
             drivers/inverter.c \
+            drivers/i2c_rcout.c \
             drivers/light_ws2811strip.c \
             drivers/light_ws2811strip_hal.c \
             drivers/light_ws2811strip_stdperiph.c \

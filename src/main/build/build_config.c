@@ -25,9 +25,9 @@
 
 #include "build_config.h"
 
-#ifdef USE_CLI_DEBUG_PRINT
-#warning Do not use USE_CLI_DEBUG_PRINT for production builds.
-#endif
+// #ifdef USE_CLI_DEBUG_PRINT
+// #warning Do not use USE_CLI_DEBUG_PRINT for production builds.
+// #endif
 
 mcuTypeId_e getMcuTypeId(void)
 {

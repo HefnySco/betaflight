@@ -18,23 +18,26 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "drivers/bus_i2c.h"
-#include "drivers/io_types.h"
-#include "drivers/rcc_types.h"
+#include "platform.h"
 
-#include "pg/pg.h"
+#ifdef USE_TARGET_CONFIG
 
-#define I2C_CLOCKSPEED_MIN_KHZ      100
-#define I2C_CLOCKSPEED_MAX_KHZ      1300
+#include "io/serial.h"
+#include "pg/motor.h"
+#include "drivers/motor.h"
 
-typedef struct i2cConfig_s {
-    ioTag_t ioTagScl;
-    ioTag_t ioTagSda;
-    bool pullUp;
-    uint16_t clockSpeed;
-    uint8_t address;
-} i2cConfig_t;
+#include "build/debug.h"
 
-PG_DECLARE_ARRAY(i2cConfig_t, I2CDEV_COUNT, i2cConfig);
+
+void targetConfiguration(void)
+{
+    motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_STANDARD;
+    motorConfigMutable()->minthrottle = 700;
+    motorConfigMutable()->maxthrottle = 2000;
+    motorConfigMutable()->mincommand = 700;
+
+}
+#endif

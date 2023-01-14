@@ -497,7 +497,7 @@ STATIC_UNIT_TESTED gyroHardware_e gyroDetect(gyroDev_t *dev)
         FALLTHROUGH;
 #endif
 
-#ifdef USE_FAKE_GYRO
+#if (defined(USE_FAKE_GYRO) || defined(USE_SUPER_FAKE_GYRO))
     case GYRO_FAKE:
         if (fakeGyroDetect(dev)) {
             gyroHardware = GYRO_FAKE;
@@ -526,7 +526,7 @@ static bool gyroDetectSensor(gyroSensor_t *gyroSensor, const gyroDeviceConfig_t 
 
     bool gyroFound = mpuDetect(&gyroSensor->gyroDev, config);
 
-#if !defined(USE_FAKE_GYRO) // Allow resorting to fake accgyro if defined
+#if !defined(USE_FAKE_GYRO) && !(USE_SUPER_FAKE_GYRO)// Allow resorting to fake accgyro if defined
     if (!gyroFound) {
         return false;
     }

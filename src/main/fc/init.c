@@ -58,6 +58,7 @@
 #include "drivers/inverter.h"
 #include "drivers/io.h"
 #include "drivers/light_led.h"
+#include "drivers/light_ledx.h"
 #include "drivers/mco.h"
 #include "drivers/nvic.h"
 #include "drivers/persistent.h"
@@ -77,6 +78,7 @@
 #include "drivers/timer.h"
 #include "drivers/transponder_ir.h"
 #include "drivers/usb_io.h"
+#include "drivers/i2c_rcout.h"
 #ifdef USE_USB_MSC
 #include "drivers/usb_msc.h"
 #endif
@@ -427,6 +429,11 @@ void init(void)
 #endif
     LED2_ON;
 
+
+#ifdef USE_LEDX
+    ledxInit(statusLedxConfig());
+#endif
+
 #if !defined(SIMULATOR_BUILD)
     EXTIInit();
 #endif
@@ -572,7 +579,6 @@ void init(void)
         pwmRxInit(pwmConfig());
     }
 #endif
-
 #ifdef USE_BEEPER
     beeperInit(beeperDevConfig());
 #endif
@@ -995,6 +1001,9 @@ void init(void)
 #ifdef USE_MOTOR
     motorPostInit();
     motorEnable();
+#endif
+#ifdef USE_I2C_RCOUT
+    i2c_rcout_init();
 #endif
 
     // On H7/G4 allocate SPI DMA streams after motor timers as SPI DMA allocate will always be possible

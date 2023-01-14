@@ -129,6 +129,10 @@
 #define SCHEDULER_DELAY_LIMIT           100
 #endif
 
+#ifndef TASK_ACC_DESIRED_PERIOD
+#define TASK_ACC_DESIRED_PERIOD          1000
+#endif
+
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
 #define DEFAULT_AUX_CHANNEL_COUNT       MAX_AUX_CHANNEL_COUNT
 #else

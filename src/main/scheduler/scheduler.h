@@ -100,16 +100,28 @@ typedef enum {
     TASK_SYSTEM = 0,
     TASK_MAIN,
     TASK_GYRO,
+    
+#ifdef USE_TASK_FILTER
     TASK_FILTER,
+#endif 
+#ifdef USE_TASK_PID
     TASK_PID,
+#endif 
     TASK_ACCEL,
+#ifdef USE_TASK_ATTITUDE
     TASK_ATTITUDE,
+#endif
     TASK_RX,
     TASK_SERIAL,
     TASK_DISPATCH,
     TASK_BATTERY_VOLTAGE,
     TASK_BATTERY_CURRENT,
+#ifdef USE_BATTERY
     TASK_BATTERY_ALERTS,
+#endif 
+#ifdef USE_TASK_MOTORS
+    TASK_MOTORS,
+#endif
 #ifdef USE_BEEPER
     TASK_BEEPER,
 #endif
@@ -177,7 +189,9 @@ typedef enum {
 #ifdef USE_CRSF_V3
     TASK_SPEED_NEGOTIATION,
 #endif
-
+#ifdef USE_I2C_RCOUT
+    TASK_I2CRCOUT,
+#endif
     /* Count of real tasks */
     TASK_COUNT,
 

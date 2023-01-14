@@ -18,6 +18,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 #include "drivers/time.h"
 #include "drivers/nvic.h"
 #include "drivers/rcc.h"
+#include "drivers/i2c_rcout.h"
 
 #include "drivers/bus_i2c.h"
 #include "drivers/bus_i2c_impl.h"
@@ -47,7 +49,12 @@
 #define UNSTICK_CLK_STRETCH (500/UNSTICK_CLK_US)
 
 static void i2c_er_handler(I2CDevice device);
+
 static void i2c_ev_handler(I2CDevice device);
+#ifdef USE_I2C_SLAVE
+static void i2c_ev_slave_handler (I2CDevice device);
+static void i2c_er_slave_handler(I2CDevice device);
+#endif 
 static void i2cUnstick(IO_t scl, IO_t sda);
 
 #ifdef STM32F4
@@ -131,33 +138,57 @@ static volatile uint16_t i2cErrorCount = 0;
 
 void I2C1_ER_IRQHandler(void)
 {
+#if I2C1_ADDRESS == 0
     i2c_er_handler(I2CDEV_1);
+#else
+    i2c_er_slave_handler(I2CDEV_1);
+#endif 
 }
 
 void I2C1_EV_IRQHandler(void)
 {
+#if I2C1_ADDRESS == 0
     i2c_ev_handler(I2CDEV_1);
+#else
+    i2c_ev_slave_handler(I2CDEV_1);
+#endif
 }
 
 void I2C2_ER_IRQHandler(void)
 {
+#if I2C2_ADDRESS == 0
     i2c_er_handler(I2CDEV_2);
+#else
+    i2c_er_slave_handler(I2CDEV_2);
+#endif 
 }
 
 void I2C2_EV_IRQHandler(void)
 {
+#if I2C2_ADDRESS == 0
     i2c_ev_handler(I2CDEV_2);
+#else
+    i2c_ev_slave_handler(I2CDEV_2);
+#endif
 }
 
 #ifdef STM32F4
 void I2C3_ER_IRQHandler(void)
 {
+#if I2C3_ADDRESS == 0
     i2c_er_handler(I2CDEV_3);
+#else
+    i2c_er_slave_handler(I2CDEV_3);
+#endif    
 }
 
 void I2C3_EV_IRQHandler(void)
 {
+#if I2C3_ADDRESS == 0
     i2c_ev_handler(I2CDEV_3);
+#else
+    i2c_ev_slave_handler(I2CDEV_3);
+#endif
 }
 #endif
 
@@ -290,6 +321,56 @@ bool i2cRead(I2CDevice device, uint8_t addr_, uint8_t reg_, uint8_t len, uint8_t
     return i2cReadBuffer(device, addr_, reg_, len, buf) && i2cWait(device);
 }
 
+#ifdef USE_I2C_SLAVE
+static void i2c_er_slave_handler (I2CDevice device)
+{
+    I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
+
+    i2cState_t *state = &i2cDevice[device].state;
+    
+    
+    //Can't use nice switch statement, because no fxn available
+		if(I2C_GetITStatus(I2Cx,        I2C_IT_SMBALERT)) {
+		} else if(I2C_GetITStatus(I2Cx, I2C_IT_TIMEOUT)) {
+		} else if(I2C_GetITStatus(I2Cx, I2C_IT_PECERR)) {
+		} else if(I2C_GetITStatus(I2Cx, I2C_IT_OVR)) {
+			//Overrun
+			//CLK stretch disabled and receiving
+			//DR has not been read, b4 next byte comes in
+			//effect: lose byte
+			//should:clear RxNE and transmitter should retransmit
+
+			//Underrun
+			//CLK stretch disabled and I2C transmitting
+			//haven't updated DR since new clock
+			//effect: same byte resent
+			//should: make sure discarded, and write next
+		    state->error = true;
+        } else if(I2C_GetITStatus(I2Cx, I2C_IT_AF)) {
+			//Detected NACK
+			//Transmitter must reset com
+				//Slave: lines released
+				//Master: Stop or repeated Start must must be generated
+				//Master = MSL bit
+			//Fixup
+        	I2C_ClearITPendingBit(I2Cx, I2C_IT_AF);
+		} else if(I2C_GetITStatus(I2Cx, I2C_IT_ARLO)) {
+			//Arbitration Lost
+			//Goes to slave mode, but can't ack slave address in same transfer
+			//Can after repeat Start though
+		    state->error = true;
+        } else if(I2C_GetITStatus(I2Cx, I2C_IT_BERR)) {
+			//Bus Error
+			//In slave mode: data discarded, lines released, acts like restart
+			//In master mode: current transmission continues
+		    state->error = true;
+        }
+        
+        I2Cx->SR1 &= ~(I2C_SR1_BERR | I2C_SR1_ARLO | I2C_SR1_AF | I2C_SR1_OVR);     // reset all the error bits to clear the interrupt
+        state->busy = 0;
+    
+}
+#endif 
 static void i2c_er_handler(I2CDevice device)
 {
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
@@ -323,8 +404,112 @@ static void i2c_er_handler(I2CDevice device)
     state->busy = 0;
 }
 
-void i2c_ev_handler(I2CDevice device)
+
+
+//Clear ADDR by reading SR1, then SR2
+void I2C_clear_ADDR(I2C_TypeDef* I2Cx) {
+	I2C_GetFlagStatus(I2Cx, I2C_FLAG_ADDR);
+	((void)(I2Cx->SR2));
+}
+
+//Clear STOPF by reading SR1, then writing CR1
+void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
+	I2C_GetFlagStatus(I2Cx, I2C_FLAG_STOPF);
+	I2C_Cmd(I2Cx, ENABLE);
+}
+
+#ifdef USE_I2C_SLAVE
+void i2c_ev_slave_handler(I2CDevice device)
 {
+    uint8_t cmd;
+    uint8_t value;
+    //uint8_t cmd_value2;
+    I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
+    
+    
+
+    volatile uint32_t Event = I2C_GetLastEvent(I2Cx);
+    uint16_t *I2C_SRX_ADDR = (uint16_t *)&Event;
+        
+    
+
+    // WORKING
+    if (Event == I2C_EVENT_SLAVE_STOP_DETECTED){
+        I2C_clear_STOPF(I2Cx);
+        return ;
+    }
+    if (Event == I2C_EVENT_SLAVE_ACK_FAILURE) {//End of transmission EV3_2
+				//TODO: Doesn't seem to be getting reached, so just
+				//check at top-level
+				I2C_ClearITPendingBit(I2C1, I2C_IT_AF);
+                return ;
+    }
+	
+    if ((I2C_SRX_ADDR[0]& (I2C_SR1_ADDR)) 
+    && (I2C_SRX_ADDR[1] & (I2C_SR2_BUSY))){
+        if (I2C_SRX_ADDR[1] & (I2C_SR2_TRA))
+        {
+            // DONT return from here EV2 is active
+        }
+        else
+        {
+            // CAN BE UNCOMMENTED return ; // return from here another event will be called.
+        }
+    }
+
+    // WORKING
+    if ((I2C_SRX_ADDR[0]& (I2C_SR1_RXNE)) 
+    && (I2C_SRX_ADDR[1] & (I2C_SR2_BUSY))){
+        cmd = I2C_ReceiveData(I2Cx);
+        
+        if (I2C_SRX_ADDR[1] & (I2C_SR2_TRA))
+        {
+ 
+        }
+        else
+        {
+            if (!(I2C_SRX_ADDR[0] & (I2C_SR1_RXNE))) return ;
+            if (cmd == 0xEE)
+            {
+                value = I2C_ReceiveData(I2Cx);
+                return ;
+            }
+            value = I2C_ReceiveData(I2Cx);
+#ifdef USE_RCOUT_I2C            
+            i2c_rcout_parseCommand(cmd, value);
+#endif
+            
+            
+        }
+        //I2C_GenerateSTOP(I2Cx, ENABLE);
+        
+    }
+
+    if ((I2C_SRX_ADDR[0] & (I2C_SR1_TXE)) 
+    && (I2C_SRX_ADDR[1]& (I2C_SR2_BUSY | I2C_SR2_TRA ))){
+        if(I2C_SRX_ADDR[0] & (I2C_SR1_BTF)){
+            // EV2: (transmit buffer empty and byte transfer finished")
+            // send next character if you need
+            I2C_SendData(I2Cx, 0x00);
+        }
+        else {
+            // EV2: (transmit buffer empty")
+#ifdef USE_RCOUT_I2C
+            if (device == USE_RCOUT_I2C)
+            {
+                I2C_SendData(I2Cx, i2c_rcout_getReply(cmd));
+            }
+            else
+            {
+                I2C_SendData(I2Cx, 0x00);
+            }
+#endif
+        }
+    }
+}
+#endif
+void i2c_ev_handler(I2CDevice device) {
+	
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
 
     i2cState_t *state = &i2cDevice[device].state;
@@ -480,11 +665,18 @@ void i2cInit(I2CDevice device)
 
     I2C_DeInit(I2Cx);
     I2C_StructInit(&i2cInit);
-
-    I2C_ITConfig(I2Cx, I2C_IT_EVT | I2C_IT_ERR, DISABLE);               // Disable EVT and ERR interrupts - they are enabled by the first request
+    if (pDev->address!=0)
+    {
+        I2C_ITConfig(I2Cx, I2C_IT_EVT | I2C_IT_ERR, ENABLE);               // SLAVE Mode
+    }
+    else
+    {
+        I2C_ITConfig(I2Cx, I2C_IT_EVT | I2C_IT_ERR, DISABLE);               // Disable EVT and ERR interrupts - they are enabled by the first request
+    }
+    
     i2cInit.I2C_Mode = I2C_Mode_I2C;
     i2cInit.I2C_DutyCycle = I2C_DutyCycle_2;
-    i2cInit.I2C_OwnAddress1 = 0;
+    i2cInit.I2C_OwnAddress1 = pDev->address << 1;
     i2cInit.I2C_Ack = I2C_Ack_Enable;
     i2cInit.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
     i2cInit.I2C_ClockSpeed = pDev->clockSpeed * 1000;

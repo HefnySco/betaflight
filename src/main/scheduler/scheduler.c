@@ -496,14 +496,24 @@ FAST_CODE void scheduler(void)
 #endif
             currentTimeUs = micros();
             taskExecutionTimeUs += schedulerExecuteTask(gyroTask, currentTimeUs);
-
+            
+            #if defined (USE_TASK_FILTER)
             if (gyroFilterReady()) {
                 taskExecutionTimeUs += schedulerExecuteTask(getTask(TASK_FILTER), currentTimeUs);
             }
+            #endif
+
             if (pidLoopReady()) {
+            #if defined (USE_TASK_PID)
                 taskExecutionTimeUs += schedulerExecuteTask(getTask(TASK_PID), currentTimeUs);
+            #endif
             }
 
+            #if defined (USE_TASK_MOTORS)
+                taskExecutionTimeUs += schedulerExecuteTask(getTask(TASK_MOTORS), currentTimeUs);
+            #endif
+            
+            
             // Check for incoming RX data. Don't do this in the checker as that is called repeatedly within
             // a given gyro loop, and ELRS takes a long time to process this and so can only be safely processed
             // before the checkers

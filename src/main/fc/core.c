@@ -51,6 +51,7 @@
 #include "drivers/system.h"
 #include "drivers/time.h"
 #include "drivers/transponder_ir.h"
+#include "drivers/i2c_rcout.h"
 
 #include "fc/controlrate_profile.h"
 #include "fc/rc.h"
@@ -182,7 +183,10 @@ PG_RESET_TEMPLATE(throttleCorrectionConfig_t, throttleCorrectionConfig,
 
 static bool isCalibrating(void)
 {
-    return (sensors(SENSOR_GYRO) && !gyroIsCalibrationComplete())
+    return false
+#ifdef USE_GYRO
+        || (sensors(SENSOR_GYRO) && !gyroIsCalibrationComplete())
+#endif
 #ifdef USE_ACC
         || (sensors(SENSOR_ACC) && !accIsCalibrationComplete())
 #endif
@@ -1010,10 +1014,14 @@ void processRxModes(timeUs_t currentTimeUs)
     if (FLIGHT_MODE(ANGLE_MODE) || FLIGHT_MODE(HORIZON_MODE)) {
         LED1_ON;
         // increase frequency of attitude task to reduce drift when in angle or horizon mode
+        #if defined (USE_TASK_ATTITUDE)
         rescheduleTask(TASK_ATTITUDE, TASK_PERIOD_HZ(acc.sampleRateHz / (float)imuConfig()->imu_process_denom));
+        #endif
     } else {
         LED1_OFF;
+        #if defined (USE_TASK_ATTITUDE)
         rescheduleTask(TASK_ATTITUDE, TASK_PERIOD_HZ(acc.sampleRateHz / 10.0f));
+        #endif
     }
 
     if (!IS_RC_MODE_ACTIVE(BOXPREARM) && ARMING_FLAG(WAS_ARMED_WITH_PREARM)) {
@@ -1187,9 +1195,10 @@ void subTaskTelemetryPollSensors(timeUs_t currentTimeUs)
     }
 }
 #endif
-
+//MHEFNY: Motor Control Task
 static FAST_CODE void subTaskMotorUpdate(timeUs_t currentTimeUs)
 {
+    UNUSED (currentTimeUs);
     uint32_t startTime = 0;
     if (debugMode == DEBUG_CYCLETIME) {
         startTime = micros();
@@ -1198,20 +1207,25 @@ static FAST_CODE void subTaskMotorUpdate(timeUs_t currentTimeUs)
         debug[2] = currentDeltaTime;
         debug[3] = currentDeltaTime - targetPidLooptime;
         previousMotorUpdateTime = startTime;
-    } else if (debugMode == DEBUG_PIDLOOP) {
+    } else if ((debugMode == DEBUG_PIDLOOP) || (debugMode == DEBUG_MOTORLOOP)) {
         startTime = micros();
     }
-
+#ifdef USE_I2C_RCOUT
+    i2c_rcout_writeMotors();
+    // writeMotors();
+    // return ;
+#else
     mixTable(currentTimeUs);
 
-#ifdef USE_SERVOS
-    // motor outputs are used as sources for servo mixing, so motors must be calculated using mixTable() before servos.
-    if (isMixerUsingServos()) {
-        writeServos();
-    }
-#endif
-
+    #ifdef USE_SERVOS
+        // motor outputs are used as sources for servo mixing, so motors must be calculated using mixTable() before servos.
+        if (isMixerUsingServos()) {
+            writeServos();
+        }
+    #endif
     writeMotors();
+#endif
+    
 
 #ifdef USE_DSHOT_TELEMETRY_STATS
     if (debugMode == DEBUG_DSHOT_RPM_ERRORS && useDshotTelemetry) {
@@ -1301,6 +1315,24 @@ FAST_CODE void taskMainPidLoop(timeUs_t currentTimeUs)
     subTaskMotorUpdate(currentTimeUs);
     subTaskPidSubprocesses(currentTimeUs);
 
+    DEBUG_SET(DEBUG_CYCLETIME, 0, getTaskDeltaTimeUs(TASK_SELF));
+    DEBUG_SET(DEBUG_CYCLETIME, 1, getAverageSystemLoadPercent());
+}
+
+// Function for loop trigger
+FAST_CODE void taskMotors(timeUs_t currentTimeUs)
+{
+
+#if defined(SIMULATOR_BUILD) && defined(SIMULATOR_GYROPID_SYNC)
+    if (lockMainPID() != 0) return;
+#endif
+
+    // DEBUG_PIDLOOP, timings for:
+    
+    DEBUG_SET(DEBUG_PIDLOOP, 0, micros() - currentTimeUs);
+
+    subTaskMotorUpdate(currentTimeUs);
+    
     DEBUG_SET(DEBUG_CYCLETIME, 0, getTaskDeltaTimeUs(TASK_SELF));
     DEBUG_SET(DEBUG_CYCLETIME, 1, getAverageSystemLoadPercent());
 }

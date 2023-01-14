@@ -44,20 +44,45 @@ typedef struct i2cDefaultConfig_s {
     ioTag_t ioTagScl, ioTagSda;
     bool pullUp;
     uint16_t clockSpeed;
+    uint8_t address; // MHEFNY:if not 0 then it is a slave i2c
 } i2cDefaultConfig_t;
 
 static const i2cDefaultConfig_t i2cDefaultConfig[] = {
 #ifdef USE_I2C_DEVICE_1
-    { I2CDEV_1, IO_TAG(I2C1_SCL), IO_TAG(I2C1_SDA), I2C1_PULLUP, I2C1_CLOCKSPEED },
+    #ifndef I2C1_ADDRESS
+        #define I2C1_ADDRESS 0
+    #endif
+    #if (I2C1_ADDRESS & 0x80) == 0x80
+        #error "Bad I2C1_ADDRESS address should be less than 128"
+    #endif
+    { I2CDEV_1, IO_TAG(I2C1_SCL), IO_TAG(I2C1_SDA), I2C1_PULLUP, I2C1_CLOCKSPEED, I2C1_ADDRESS },
 #endif
 #ifdef USE_I2C_DEVICE_2
-    { I2CDEV_2, IO_TAG(I2C2_SCL), IO_TAG(I2C2_SDA), I2C2_PULLUP, I2C2_CLOCKSPEED },
+    #ifndef I2C2_ADDRESS
+        #define I2C2_ADDRESS 0
+    #endif
+    #if (I2C2_ADDRESS & 0x80) == 0x80
+        #error "Bad I2C2_ADDRESS address should be less than 128"
+    #endif
+    { I2CDEV_2, IO_TAG(I2C2_SCL), IO_TAG(I2C2_SDA), I2C2_PULLUP, I2C2_CLOCKSPEED, I2C2_ADDRESS },
 #endif
 #ifdef USE_I2C_DEVICE_3
-    { I2CDEV_3, IO_TAG(I2C3_SCL), IO_TAG(I2C3_SDA), I2C3_PULLUP, I2C3_CLOCKSPEED },
+    #ifndef I2C3_ADDRESS
+        #define I2C3_ADDRESS 0
+    #endif
+    #if (I2C3_ADDRESS & 0x80) == 0x80
+        #error "Bad I2C3_ADDRESS address should be less than 128"
+    #endif
+    { I2CDEV_3, IO_TAG(I2C3_SCL), IO_TAG(I2C3_SDA), I2C3_PULLUP, I2C3_CLOCKSPEED, I2C3_ADDRESS },
 #endif
 #ifdef USE_I2C_DEVICE_4
-    { I2CDEV_4, IO_TAG(I2C4_SCL), IO_TAG(I2C4_SDA), I2C4_PULLUP, I2C4_CLOCKSPEED },
+    #ifndef I2C4_ADDRESS
+        #define I2C4_ADDRESS 0
+    #endif
+    #if (I2C4_ADDRESS & 0x80) == 0x80
+        #error "Bad I2C4_ADDRESS address should be less than 128"
+    #endif
+    { I2CDEV_4, IO_TAG(I2C4_SCL), IO_TAG(I2C4_SDA), I2C4_PULLUP, I2C4_CLOCKSPEED, I2C4_ADDRESS },
 #endif
 };
 
@@ -72,6 +97,7 @@ void pgResetFn_i2cConfig(i2cConfig_t *i2cConfig)
         i2cConfig[device].ioTagSda = defconf->ioTagSda;
         i2cConfig[device].pullUp = defconf->pullUp;
         i2cConfig[device].clockSpeed = defconf->clockSpeed;
+        i2cConfig[device].address = defconf->address;
     }
 }
 

@@ -51,7 +51,7 @@ static IO_t buttonBPin = IO_NONE;
 #endif
 
 void buttonsInit(void)
-{
+{//MHEFNY: Button Control
 #ifdef BUTTON_A_PIN
     buttonAPin = IOGetByTag(IO_TAG(BUTTON_A_PIN));
     IOInit(buttonAPin, OWNER_SYSTEM, 0);

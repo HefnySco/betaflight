@@ -18,23 +18,23 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <stdint.h>
 
-#include "drivers/bus_i2c.h"
-#include "drivers/io_types.h"
-#include "drivers/rcc_types.h"
+#include "platform.h"
+#include "drivers/io.h"
 
-#include "pg/pg.h"
+#include "drivers/timer.h"
+#include "drivers/timer_def.h"
+#include "drivers/dma.h"
 
-#define I2C_CLOCKSPEED_MIN_KHZ      100
-#define I2C_CLOCKSPEED_MAX_KHZ      1300
-
-typedef struct i2cConfig_s {
-    ioTag_t ioTagScl;
-    ioTag_t ioTagSda;
-    bool pullUp;
-    uint16_t clockSpeed;
-    uint8_t address;
-} i2cConfig_t;
-
-PG_DECLARE_ARRAY(i2cConfig_t, I2CDEV_COUNT, i2cConfig);
+const timerHardware_t timerHardware[USABLE_TIMER_CHANNEL_COUNT] = {
+        DEF_TIM(TIM3, CH1, PA6, TIM_USE_MOTOR,   0, 0), 
+        DEF_TIM(TIM3, CH2, PA7, TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM3, CH3, PB0, TIM_USE_MOTOR, 0, 0),
+        DEF_TIM(TIM3, CH4, PB1, TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM2, CH3, PB10, TIM_USE_MOTOR , 0, 0), 
+        DEF_TIM(TIM1, CH1N, PB13, TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM1, CH2N, PB14, TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM1, CH3N, PB15, TIM_USE_MOTOR,   0, 0), 
+        
+};

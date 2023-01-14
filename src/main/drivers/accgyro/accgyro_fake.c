@@ -28,7 +28,7 @@
 #include <pthread.h>
 #endif
 
-#ifdef USE_FAKE_GYRO
+#if (defined(USE_FAKE_GYRO) || defined(USE_SUPER_FAKE_GYRO))
 
 #include "build/build_config.h"
 
@@ -38,7 +38,9 @@
 #include "drivers/accgyro/accgyro.h"
 #include "drivers/accgyro/accgyro_fake.h"
 
+#ifndef USE_SUPER_FAKE_GYRO
 static int16_t fakeGyroADC[XYZ_AXIS_COUNT];
+#endif
 gyroDev_t *fakeGyroDev;
 
 static void fakeGyroInit(gyroDev_t *gyro)
@@ -53,6 +55,13 @@ static void fakeGyroInit(gyroDev_t *gyro)
 
 void fakeGyroSet(gyroDev_t *gyro, int16_t x, int16_t y, int16_t z)
 {
+#ifdef USE_SUPER_FAKE_GYRO
+        UNUSED(gyro);
+        UNUSED(x);
+        UNUSED(y);
+        UNUSED(z);
+        return ;
+#else
     gyroDevLock(gyro);
 
     fakeGyroADC[X] = x;
@@ -62,10 +71,15 @@ void fakeGyroSet(gyroDev_t *gyro, int16_t x, int16_t y, int16_t z)
     gyro->dataReady = true;
 
     gyroDevUnLock(gyro);
+#endif
 }
 
 STATIC_UNIT_TESTED bool fakeGyroRead(gyroDev_t *gyro)
 {
+#ifdef USE_SUPER_FAKE_GYRO
+    UNUSED (gyro);
+    return true;
+#else
     gyroDevLock(gyro);
     if (gyro->dataReady == false) {
         gyroDevUnLock(gyro);
@@ -79,6 +93,7 @@ STATIC_UNIT_TESTED bool fakeGyroRead(gyroDev_t *gyro)
 
     gyroDevUnLock(gyro);
     return true;
+#endif
 }
 
 static bool fakeGyroReadTemperature(gyroDev_t *gyro, int16_t *temperatureData)
@@ -97,6 +112,9 @@ bool fakeGyroDetect(gyroDev_t *gyro)
     gyro->scale = GYRO_SCALE_2000DPS;
 #else
     gyro->scale = 1.0f;
+#endif
+#if defined (USE_SUPER_FAKE_GYRO)
+    gyro->mpuDetectionResult.sensor = MPU_NONE;
 #endif
     return true;
 }
