@@ -33,9 +33,11 @@
 #include "drivers/nvic.h"
 #include "drivers/rcc.h"
 #include "drivers/i2c_rcout.h"
+#include "drivers/i2c_battery.h"
 
 #include "drivers/bus_i2c.h"
 #include "drivers/bus_i2c_impl.h"
+#include "cli/cli.h"
 
 // Number of bits in I2C protocol phase
 #define LEN_ADDR 7
@@ -419,95 +421,126 @@ void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
 }
 
 #ifdef USE_I2C_SLAVE
+    
+static uint8_t data_in[2][3];
+static uint8_t data_in_index[2];
+static uint8_t indexx = 0;
+char msg[80];
 void i2c_ev_slave_handler(I2CDevice device)
 {
-    uint8_t cmd;
-    uint8_t value;
-    //uint8_t cmd_value2;
+
+ 
+
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
-    
-    
 
     volatile uint32_t Event = I2C_GetLastEvent(I2Cx);
     uint16_t *I2C_SRX_ADDR = (uint16_t *)&Event;
-        
-    
 
-    // WORKING
-    if (Event == I2C_EVENT_SLAVE_STOP_DETECTED){
+    switch (device)
+    {
+    #ifdef USE_RCOUT_I2C
+        case USE_RCOUT_I2C:
+            indexx=0;
+            break;
+    #endif
+
+    #ifdef USE_BATTERY
+        case  USE_BATTERY_I2C:
+            indexx=1;
+            break;
+    #endif
+        default:
+            indexx=0;
+        break;
+    }
+
+    // called after full read
+    // here you should process the i2cset command 
+    if (Event == I2C_EVENT_SLAVE_STOP_DETECTED)
+    {
         I2C_clear_STOPF(I2Cx);
+        
+#ifdef USE_RCOUT_I2C
+    if (device == USE_RCOUT_I2C)
+    {
+        i2c_rcout_parseCommand(data_in[indexx][0], (data_in[indexx][2] << 8) | data_in[indexx][1] );
+    }
+#endif
+#ifdef USE_BATTERY
+    if (device == USE_BATTERY_I2C)
+    {
+        i2c_battery_parseCommand(data_in[indexx][0], data_in[indexx][1]);
+    }
+#endif
         return ;
     }
-    if (Event == I2C_EVENT_SLAVE_ACK_FAILURE) {//End of transmission EV3_2
+
+    if (Event == I2C_EVENT_SLAVE_ACK_FAILURE) 
+    {//End of transmission EV3_2
 				//TODO: Doesn't seem to be getting reached, so just
 				//check at top-level
-				I2C_ClearITPendingBit(I2C1, I2C_IT_AF);
-                return ;
-    }
-	
-    if ((I2C_SRX_ADDR[0]& (I2C_SR1_ADDR)) 
-    && (I2C_SRX_ADDR[1] & (I2C_SR2_BUSY))){
-        if (I2C_SRX_ADDR[1] & (I2C_SR2_TRA))
-        {
-            // DONT return from here EV2 is active
-        }
-        else
-        {
-            // CAN BE UNCOMMENTED return ; // return from here another event will be called.
-        }
+        I2C_ClearITPendingBit(I2C1, I2C_IT_AF);
+        
+        return ;
     }
 
-    // WORKING
-    if ((I2C_SRX_ADDR[0]& (I2C_SR1_RXNE)) 
-    && (I2C_SRX_ADDR[1] & (I2C_SR2_BUSY))){
-        cmd = I2C_ReceiveData(I2Cx);
-        
-        if (I2C_SRX_ADDR[1] & (I2C_SR2_TRA))
-        {
- 
-        }
-        else
-        {
-            if (!(I2C_SRX_ADDR[0] & (I2C_SR1_RXNE))) return ;
-            if (cmd == 0xEE)
-            {
-                value = I2C_ReceiveData(I2Cx);
-                return ;
-            }
-            value = I2C_ReceiveData(I2Cx);
-#ifdef USE_RCOUT_I2C            
-            i2c_rcout_parseCommand(cmd, value);
-#endif
-            
-            
-        }
-        //I2C_GenerateSTOP(I2Cx, ENABLE);
-        
-    }
 
-    if ((I2C_SRX_ADDR[0] & (I2C_SR1_TXE)) 
-    && (I2C_SRX_ADDR[1]& (I2C_SR2_BUSY | I2C_SR2_TRA ))){
-        if(I2C_SRX_ADDR[0] & (I2C_SR1_BTF)){
-            // EV2: (transmit buffer empty and byte transfer finished")
-            // send next character if you need
-            I2C_SendData(I2Cx, 0x00);
-        }
-        else {
-            // EV2: (transmit buffer empty")
-#ifdef USE_RCOUT_I2C
+    if ((I2C_SRX_ADDR[0] & I2C_SR1_ADDR) 
+      &&(I2C_SRX_ADDR[1] & I2C_SR2_BUSY))
+    {
+        
+		data_in_index[indexx] = 0;
+        memset (data_in[indexx],0,3);
+
+        
+        if (I2C_SRX_ADDR[1] & I2C_SR2_TRA)
+        {   // i2cget... waiting data from slave
+            // this is called after sending register id.
+            data_in[indexx][data_in_index[indexx]] = (uint8_t)I2Cx->DR;
+            uint8_t ret[2];
+            uint8_t length;
+        #ifdef USE_RCOUT_I2C
             if (device == USE_RCOUT_I2C)
             {
-                I2C_SendData(I2Cx, i2c_rcout_getReply(cmd));
+                i2c_rcout_getReply(data_in[indexx][0], ret, &length);
             }
-            else
+        #endif
+        #ifdef USE_BATTERY
+            if (device == USE_BATTERY_I2C)
             {
-                I2C_SendData(I2Cx, 0x00);
+                i2c_battery_getReply(data_in[indexx][0], ret, &length);
             }
-#endif
+        #endif
+            // send reply values to master
+            for (int i=0;i<length;++i)
+            {
+                I2C_SendData(I2Cx, ret[i]);
+            }
         }
+        else
+        { // we are in i2cget command:
+          // sending data to slave ... this can be the register number or extra data.
+          // so even with i2cget from master this part of called is called to send register number
+          // UNLESS there is NO rester number. e.g i2cget 1 0x66 [Enter]
+
+          // Do nothing Here.
+        }
+    }else
+    if (I2C_SRX_ADDR[0] & I2C_SR1_RXNE)
+    {   // i2cset ... 
+        // Reading parameters here.
+        if (data_in_index[indexx]>2)  
+        {
+            data_in_index[indexx] = 0; 
+            return ;
+        }
+        data_in[indexx][data_in_index[indexx]] = (uint8_t)I2Cx->DR;
+        ++data_in_index[indexx];
     }
 }
+
 #endif
+
 void i2c_ev_handler(I2CDevice device) {
 	
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;

@@ -79,6 +79,7 @@
 #include "drivers/transponder_ir.h"
 #include "drivers/usb_io.h"
 #include "drivers/i2c_rcout.h"
+#include "drivers/i2c_battery.h"
 #ifdef USE_USB_MSC
 #include "drivers/usb_msc.h"
 #endif
@@ -1004,6 +1005,10 @@ void init(void)
 #endif
 #ifdef USE_I2C_RCOUT
     i2c_rcout_init();
+#endif
+
+#ifdef USE_BATTERY
+    i2c_battery_init();
 #endif
 
     // On H7/G4 allocate SPI DMA streams after motor timers as SPI DMA allocate will always be possible

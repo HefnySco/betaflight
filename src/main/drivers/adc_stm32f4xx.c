@@ -227,6 +227,26 @@ void adcInit(const adcConfig_t *config)
         adcOperatingConfig[ADC_EXTERNAL1].tag = config->external1.ioTag; //EXTERNAL1_ADC_CHANNEL;
     }
 
+    if (config->external2.enabled) {
+        adcOperatingConfig[ADC_EXTERNAL2].tag = config->external2.ioTag; //EXTERNAL2_ADC_CHANNEL;
+    }
+
+    if (config->external3.enabled) {
+        adcOperatingConfig[ADC_EXTERNAL3].tag = config->external3.ioTag; //EXTERNAL3_ADC_CHANNEL;
+    }
+
+    if (config->external4.enabled) {
+        adcOperatingConfig[ADC_EXTERNAL4].tag = config->external4.ioTag; //EXTERNAL4_ADC_CHANNEL;
+    }
+
+    if (config->external5.enabled) {
+        adcOperatingConfig[ADC_EXTERNAL5].tag = config->external5.ioTag; //EXTERNAL5_ADC_CHANNEL;
+    }
+
+    if (config->external6.enabled) {
+        adcOperatingConfig[ADC_EXTERNAL6].tag = config->external6.ioTag; //EXTERNAL6_ADC_CHANNEL;
+    }
+
     if (config->current.enabled) {
         adcOperatingConfig[ADC_CURRENT].tag = config->current.ioTag;  //CURRENT_METER_ADC_CHANNEL;
     }

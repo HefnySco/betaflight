@@ -73,8 +73,13 @@
 #define I2C1_SCL                PB6
 #define I2C1_ADDRESS            0x66
 
-#define USE_RCOUT_I2C           I2CDEV_1
+#define USE_I2C_DEVICE_3
+#define I2C3_SDA                PB4
+#define I2C3_SCL                PA8
+#define I2C3_ADDRESS            0x48
 
+#define USE_RCOUT_I2C           I2CDEV_1
+#define USE_BATTERY_I2C         I2CDEV_3
 #define USE_SPI
 #define USE_SPI_DEVICE_1 
 #define SPI1_SCK_PIN            NONE
@@ -94,10 +99,28 @@
 #define SPI3_MISO_PIN           NONE
 #define SPI3_MOSI_PIN           NONE
 
+// #define USE_ADC
+// //#define ADC_INSTANCE            ADC1  
+// //#define ADC1_DMA_OPT            0  // DMA 2 Stream 0 Channel 0 
+// #define VBAT_ADC_PIN            PA1
+// #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
+#define MAX_VOLTAGE_SENSOR_ADC  6
 #define USE_ADC
-//#define ADC_INSTANCE            ADC1  
-//#define ADC1_DMA_OPT            0  // DMA 2 Stream 0 Channel 0 
+#define USE_BATTERY
+
+#define USE_ADC_INTERNAL
+
+#define DEBUG_ADC_CHANNELS
 #define VBAT_ADC_PIN            PA1
+#define CURRENT_METER_ADC_PIN   PA2
+#define EXTERNAL1_ADC_PIN       PA3
+#define EXTERNAL2_ADC_PIN       PA4
+#define EXTERNAL3_ADC_PIN       PA5
+//#define EXTERNAL4_ADC_PIN     
+//#define EXTERNAL5_ADC_PIN  
+//#define EXTERNAL6_ADC_PIN     
+
+#define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
 #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
 
 

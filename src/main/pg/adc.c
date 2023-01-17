@@ -78,7 +78,41 @@ void pgResetFn_adcConfig(adcConfig_t *adcConfig)
 #endif
 #endif
 #endif
-
+#ifdef EXTERNAL2_ADC_PIN
+    adcConfig->external2.enabled = true;
+    adcConfig->external2.ioTag = IO_TAG(EXTERNAL2_ADC_PIN);
+#if defined(STM32H7)
+    #error "NOT SUPPORTED"
+#endif
+#endif
+#ifdef EXTERNAL3_ADC_PIN
+    adcConfig->external3.enabled = true;
+    adcConfig->external3.ioTag = IO_TAG(EXTERNAL3_ADC_PIN);
+#if defined(STM32H7)
+    #error "NOT SUPPORTED"
+#endif
+#endif
+#ifdef EXTERNAL4_ADC_PIN
+    adcConfig->external4.enabled = true;
+    adcConfig->external4.ioTag = IO_TAG(EXTERNAL4_ADC_PIN);
+#if defined(STM32H7)
+    #error "NOT SUPPORTED"
+#endif
+#endif
+#ifdef EXTERNAL5_ADC_PIN
+    adcConfig->external5.enabled = true;
+    adcConfig->external5.ioTag = IO_TAG(EXTERNAL5_ADC_PIN);
+#if defined(STM32H7)
+    #error "NOT SUPPORTED"
+#endif
+#endif
+#ifdef EXTERNAL6_ADC_PIN
+    adcConfig->external6.enabled = true;
+    adcConfig->external6.ioTag = IO_TAG(EXTERNAL6_ADC_PIN);
+#if defined(STM32H7)
+    #error "NOT SUPPORTED"
+#endif
+#endif
 #ifdef CURRENT_METER_ADC_PIN
     adcConfig->current.enabled = true;
     adcConfig->current.ioTag = IO_TAG(CURRENT_METER_ADC_PIN);

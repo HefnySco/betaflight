@@ -47,6 +47,7 @@
 #include "drivers/vtx_common.h"
 
 #include "drivers/i2c_rcout.h"
+#include "drivers/i2c_battery.h"
 
 #include "config/config.h"
 #include "fc/core.h"
@@ -163,7 +164,7 @@ static void taskBatteryAlerts(timeUs_t currentTimeUs)
         batteryUpdatePresence();
     }
     batteryUpdateStates(currentTimeUs);
-    batteryUpdateAlarms();
+    //batteryUpdateAlarms();  MHEFNY
 }
 #endif 
 

@@ -41,6 +41,11 @@ typedef struct adcConfig_s {
     adcChannelConfig_t rssi;
     adcChannelConfig_t current;
     adcChannelConfig_t external1;
+    adcChannelConfig_t external2;
+    adcChannelConfig_t external3;
+    adcChannelConfig_t external4;
+    adcChannelConfig_t external5;
+    adcChannelConfig_t external6;
     int8_t device; // ADCDevice
 
     uint16_t vrefIntCalibration;

@@ -28,12 +28,17 @@
 #include "io/serial.h"
 #include "pg/motor.h"
 #include "drivers/motor.h"
-
+#include "pg/adc.h"
 #include "build/debug.h"
 
 
 void targetConfiguration(void)
 {
+    #if defined (USE_BATTERY)
+    adcConfigMutable()->vbat.ioTag = IO_TAG(PA2);
+    adcConfigMutable()->current.ioTag = IO_TAG(PA1);
+    #endif 
+
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_STANDARD;
     motorConfigMutable()->minthrottle = 700;
     motorConfigMutable()->maxthrottle = 2000;

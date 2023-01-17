@@ -58,7 +58,7 @@ void i2c_rcout_init()
     i2c_rcout_disableMotor();
 }
 
-void i2c_rcout_motor(uint8_t motorRegister, uint8_t value)
+void i2c_rcout_motor(const uint8_t motorRegister, const uint16_t value)
 {
     // each motor has two registers.
     const uint8_t motorNumber = motorRegister >> 1;
@@ -75,19 +75,19 @@ void i2c_rcout_motor(uint8_t motorRegister, uint8_t value)
     else
     {   // even register .. higher value part.
         // calculate full value. 
-        uint16_t tmp = (value << 8) | (i2crcout_motor_values[motorNumber] & 0xFF);
+        //const uint16_t tmp = (value << 8) | (i2crcout_motor_values[motorNumber] & 0xFF);
         
         
         // write in i2crcout_motor motor array.
         busy = true;
-        i2crcout_motor[motorNumber] = tmp;
+        i2crcout_motor[motorNumber] = value; //tmp;
         busy = false;
         
         return ;
     }
 }
 
-bool i2c_rcout_changeMotorPwmProtocol(uint8_t pwm_protocol)
+bool i2c_rcout_changeMotorPwmProtocol(const uint8_t pwm_protocol)
 {
     // maping ardupilot pwm protocol to betaflight.
     switch (pwm_protocol)
@@ -289,8 +289,24 @@ void i2c_rcout_disable_output (const uint8_t value)
     }
 }
 
-void i2c_rcout_parseCommand(uint8_t cmd, uint8_t value)
+
+
+/**
+ * @brief parse i2c set command form i2c master.
+ * 
+ * @param cmd 
+ * @param value 
+ */
+void i2c_rcout_parseCommand(const uint8_t cmd, const uint16_t value)
 {
+    //  static int counter = 0;   
+    //  counter++;
+    // if ((cliMode) && (counter%50)) {
+    //     char msg[80];
+    //     sprintf(msg,"set motor: %d - %d", cmd , value);
+    //     cliPrintLine(msg);
+    // }
+
     switch (cmd)
     {
         case 0:
@@ -300,21 +316,30 @@ void i2c_rcout_parseCommand(uint8_t cmd, uint8_t value)
         case 4:
         case 5:
         case 6:
-        case 7: // < MAX_SUPPORTED_MOTORS
+        case 7: 
+        case 8:
+        case 9: 
+        case 10:
+        case 11: 
+        case 12:
+        case 13: 
+        case 14:
+        case 15: 
+            // < MAX_SUPPORTED_MOTORS
             i2c_rcout_motor(cmd,value);
         return ;
 
-        case PCA9685_ENABLE_OUTPUT:
+        case STM32_RCOUT_ENABLE_OUTPUT:
                 // command disable output
             i2c_rcout_disable_output(value);
         return ;
     
-        case PCA9685_TIMEOUT:
+        case STM32_RCOUT_TIMEOUT:
                 watch_dog_timeout = value;
                 status = status & (~RCOUT_STATUS_NO_INPUT) ;
         return ;
 
-        case PCA9685_CHANGE_PWM_PROTOCOL:
+        case STM32_RCOUT_CHANGE_PWM_PROTOCOL:
             // i2cset 1 0x66 0xFE 0x04brushed mode.
             if (i2c_rcout_changeMotorPwmProtocol(value ))
             {
@@ -326,21 +351,40 @@ void i2c_rcout_parseCommand(uint8_t cmd, uint8_t value)
     }
 }
 
-uint8_t i2c_rcout_getReply(uint8_t cmd)
-{
-    static uint8_t data = 0;
-    switch (cmd)
-    {
-        case 0x1:
-            return ++data;
 
-        case PCA9685_REGID:
-        return PCA9685_REGID_VALUE;
-        default:
-        return 0x0;
+/**
+ * @brief parse i2cget command from i2c master.
+ * 
+ * @param cmd 
+ * @param ret 
+ * @param length 
+ */
+void i2c_rcout_getReply(const uint8_t cmd, uint8_t *ret, uint8_t* length)
+{
+
+    if (cmd < MAX_SUPPORTED_MOTORS)
+    {   // motor values.
+        ret[0] = i2crcout_motor_values[cmd];
+        *length = 1;
+        return ;
     }
 
-    return 0;
+
+    *length = 1;
+        
+    switch (cmd)
+    {
+        case STM32_RCOUT_REGID:
+        ret[0] =  STM32_RCOUT_REGID_VALUE;
+        return ;
+        default:
+        ret[0] = 0x0;
+        return;
+    }
+
+    
+
+    return ;
 }
 
 #endif
