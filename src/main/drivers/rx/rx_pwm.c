@@ -41,13 +41,13 @@
 
 #define DEBUG_PPM_ISR
 
-#define PPM_CAPTURE_COUNT 12
+// #define PPM_CAPTURE_COUNT 12
 
-#if PPM_CAPTURE_COUNT > PWM_INPUT_PORT_COUNT
-#define PWM_PORTS_OR_PPM_CAPTURE_COUNT PPM_CAPTURE_COUNT
-#else
-#define PWM_PORTS_OR_PPM_CAPTURE_COUNT PWM_INPUT_PORT_COUNT
-#endif
+// #if PPM_CAPTURE_COUNT > PWM_INPUT_PORT_COUNT
+// #define PWM_PORTS_OR_PPM_CAPTURE_COUNT PPM_CAPTURE_COUNT
+// #else
+// #define PWM_PORTS_OR_PPM_CAPTURE_COUNT PWM_INPUT_PORT_COUNT
+// #endif
 
 // TODO - change to timer clocks ticks
 #define INPUT_FILTER_TO_HELP_WITH_NOISE_FROM_OPENLRS_TELEMETRY_RX 0x03
@@ -177,6 +177,7 @@ static void ppmOverflowCallback(timerOvrHandlerRec_t* cbRec, captureCompare_t ca
 
 static void ppmEdgeCallback(timerCCHandlerRec_t* cbRec, captureCompare_t capture)
 {
+    static int count = 0;
     UNUSED(cbRec);
     ppmISREvent(SOURCE_EDGE, capture);
 
@@ -213,7 +214,7 @@ static void ppmEdgeCallback(timerCCHandlerRec_t* cbRec, captureCompare_t capture
     /* Store the current measurement */
     ppmDev.currentTime = currentTime;
     ppmDev.currentCapture = capture;
-
+    debug[3] = ++count; //ppmDev.deltaTime;
     /* Sync pulse detection */
     if (ppmDev.deltaTime > PPM_IN_MIN_SYNC_PULSE_US) {
         if (ppmDev.pulseIndex == ppmDev.numChannelsPrevFrame
@@ -275,6 +276,7 @@ bool isPWMDataBeingReceived(void)
             return true;
         }
     }
+    
     return false;
 }
 
@@ -294,6 +296,7 @@ static void pwmEdgeCallback(timerCCHandlerRec_t *cbRec, captureCompare_t capture
     pwmInputPort_t *pwmInputPort = container_of(cbRec, pwmInputPort_t, edgeCb);
     const timerHardware_t *timerHardwarePtr = pwmInputPort->timerHardware;
 
+    
     if (pwmInputPort->state == 0) {
         pwmInputPort->rise = capture;
         pwmInputPort->state = 1;
@@ -308,7 +311,13 @@ static void pwmEdgeCallback(timerCCHandlerRec_t *cbRec, captureCompare_t capture
         // compute and store capture
         pwmInputPort->capture = pwmInputPort->fall - pwmInputPort->rise;
         captures[pwmInputPort->channel] = pwmInputPort->capture;
-
+        if (pwmInputPort->channel<4)
+        {
+            //MHEFNY: HERE IS THE PWM
+            debug[pwmInputPort->channel] = pwmInputPort->capture;
+            //debug[1] = pwmInputPort->channel;
+        }
+    
         // switch state
         pwmInputPort->state = 0;
 #if defined(USE_HAL_DRIVER)

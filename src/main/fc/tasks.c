@@ -189,6 +189,7 @@ bool taskUpdateRxMainInProgress()
     return (rxState != RX_STATE_CHECK);
 }
 
+int c = 0;
 #ifdef USE_TASK_RX
 static void taskUpdateRxMain(timeUs_t currentTimeUs)
 {
@@ -197,10 +198,14 @@ static void taskUpdateRxMain(timeUs_t currentTimeUs)
     rxState_e oldRxState = rxState;
     timeDelta_t anticipatedExecutionTime;
 
+    //debug[1] = ++c;
+    // if (cliMode) {
+    //     cliPrintLine("Here");
+    // }
     // Where we are using a state machine call schedulerIgnoreTaskExecRate() for all states bar one
-    if (rxState != RX_STATE_UPDATE) {
-        schedulerIgnoreTaskExecRate();
-    }
+    // if (rxState != RX_STATE_UPDATE) {
+    //     schedulerIgnoreTaskExecRate();
+    // }
 
     switch (rxState) {
     default:
@@ -406,7 +411,7 @@ task_attribute_t task_attributes[TASK_COUNT] = {
 #endif
 #endif
 #ifdef USE_TASK_RX
-    [TASK_RX] = DEFINE_TASK("RX", NULL, rxUpdateCheck, taskUpdateRxMain, TASK_PERIOD_HZ(33), TASK_PRIORITY_HIGH), // If event-based scheduling doesn't work, fallback to periodic scheduling
+    [TASK_RX] = DEFINE_TASK("RX", NULL, NULL, taskUpdateRxMain, TASK_PERIOD_HZ(250), TASK_PRIORITY_HIGH), // If event-based scheduling doesn't work, fallback to periodic scheduling
 #endif
 
 [TASK_DISPATCH] = DEFINE_TASK("DISPATCH", NULL, NULL, dispatchProcess, TASK_PERIOD_HZ(1000), TASK_PRIORITY_HIGH),

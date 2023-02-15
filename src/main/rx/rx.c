@@ -499,7 +499,6 @@ FAST_CODE_NOINLINE void rxFrameCheck(timeUs_t currentTimeUs, timeDelta_t current
             signalReceived = true;
             useDataDrivenProcessing = false;
         }
-
         break;
 #endif
     case RX_PROVIDER_SERIAL:
@@ -647,6 +646,9 @@ void detectAndApplySignalLossBehaviour(void)
 
     for (int channel = 0; channel < rxChannelCount; channel++) {
         float sample = rcRaw[channel]; // sample has latest RC value, rcData has last 'accepted valid' value
+        debug[1] = sample;
+        //debug[1] = channel;
+        
         const bool thisChannelValid = rxFlightChannelsValid && isPulseValid(sample);
         // if the whole packet is bad, consider all channels bad
 
@@ -697,12 +699,17 @@ void detectAndApplySignalLossBehaviour(void)
 #if defined(USE_PWM) || defined(USE_PPM)
         if (rxRuntimeState.rxProvider == RX_PROVIDER_PARALLEL_PWM || rxRuntimeState.rxProvider == RX_PROVIDER_PPM) {
             //  smooth output for PWM and PPM using moving average
+            // debug[0] = channel;
+            // debug[1] = sample;
+
             rcData[channel] = calculateChannelMovingAverage(channel, sample);
         } else
 #endif
 
         {
             //  set rcData to either validated incoming values, or failsafe-modified values
+            // debug[0] = channel;
+            // debug[1] = sample;
             rcData[channel] = sample;
         }
     }
@@ -725,9 +732,10 @@ bool calculateRxChannelsAndUpdateFailsafe(timeUs_t currentTimeUs)
     }
 
     if (!rxDataProcessingRequired) {
+        //debug[2] = 2;
         return false;
     }
-
+    //debug[2] = 1;
     rxDataProcessingRequired = false;
 
     // only proceed when no more samples to skip and suspend period is over

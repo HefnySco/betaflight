@@ -763,8 +763,11 @@ bool isAirmodeActivated()
 bool processRx(timeUs_t currentTimeUs)
 {
     if (!calculateRxChannelsAndUpdateFailsafe(currentTimeUs)) {
+        //debug[2] *= 20;
         return false;
     }
+
+    //debug[3] *= 10;
 
     updateRcRefreshRate(currentTimeUs);
 

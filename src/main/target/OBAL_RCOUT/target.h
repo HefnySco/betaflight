@@ -28,7 +28,7 @@
 #define MAX_SUPPORTED_MOTORS    8
 
 ////HOW MANY MOTORS
-#define DEFAULT_MIXER    MIXER_OCTOX8
+#define DEFAULT_MIXER    MIXER_QUADP
 
 //// TASKS SECTION
 #undef USE_CAMERA_CONTROL
@@ -78,7 +78,10 @@
 #define I2C3_SCL                PA8
 #define I2C3_ADDRESS            0x48
 
-#define USE_RCOUT_I2C           I2CDEV_1
+// RCINT:
+#define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
+#define USE_RCINT_I2C           
+#define USE_RCOUT_I2C         I2CDEV_1
 #define USE_BATTERY_I2C         I2CDEV_3
 #define USE_SPI
 #define USE_SPI_DEVICE_1 
@@ -107,18 +110,16 @@
 #define MAX_VOLTAGE_SENSOR_ADC  6
 #define USE_ADC
 #define USE_BATTERY
-
+#define USE_TASK_RX
 #define USE_ADC_INTERNAL
 
-#define DEBUG_ADC_CHANNELS
+//#define DEBUG_ADC_CHANNELS
 #define VBAT_ADC_PIN            PA1
 #define CURRENT_METER_ADC_PIN   PA2
 #define EXTERNAL1_ADC_PIN       PA3
 #define EXTERNAL2_ADC_PIN       PA4
 #define EXTERNAL3_ADC_PIN       PA5
-//#define EXTERNAL4_ADC_PIN     
-//#define EXTERNAL5_ADC_PIN  
-//#define EXTERNAL6_ADC_PIN     
+  
 
 #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
 #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
@@ -151,5 +152,5 @@
 #define USE_PWM_OUTPUT
 #define USE_MOTOR
 
-#define USABLE_TIMER_CHANNEL_COUNT 8
-#define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3))
+#define USABLE_TIMER_CHANNEL_COUNT 12
+#define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3)|TIM_N(4))
