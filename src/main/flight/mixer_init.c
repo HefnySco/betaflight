@@ -76,6 +76,17 @@ static const motorMixer_t mixerQuadP[] = {
     { 1.0f, -1.0f,  0.0f,  1.0f },          // RIGHT
     { 1.0f,  1.0f,  0.0f,  1.0f },          // LEFT
     { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
+    { 1.0f,  0.0f, -1.0f, -1.0f },          // FRONT
 };
 
 #if defined(USE_UNCOMMON_MIXERS)
@@ -137,6 +148,9 @@ static const motorMixer_t mixerY6[] = {
 #define mixerY6 NULL
 #endif // USE_UNCOMMON_MIXERS
 #else
+#define mixerHex6H NULL
+#define mixerHex6P NULL
+#define mixerY6 NULL
 #define mixerHex6X NULL
 #endif // MAX_SUPPORTED_MOTORS >= 6
 
@@ -220,7 +234,7 @@ const mixer_t mixers[] = {
     // motors, use servo, motor mixer
     { 0, false, NULL },                // entry 0
     { 3, true,  mixerTricopter },      // MIXER_TRI
-    { 4, false, mixerQuadP },          // MIXER_QUADP
+    { MAX_SUPPORTED_MOTORS, false, mixerQuadP },          // MIXER_QUADP
     { 4, false, mixerQuadX },          // MIXER_QUADX
     { 2, true,  mixerBicopter },       // MIXER_BICOPTER
     { 0, true,  NULL },                // * MIXER_GIMBAL

@@ -25,7 +25,7 @@
 #define USE_TARGET_CONFIG
 
 //#define INVERTER_PIN_UART2      PC14
-#define MAX_SUPPORTED_MOTORS    8
+#define MAX_SUPPORTED_MOTORS   8
 
 ////HOW MANY MOTORS
 #define DEFAULT_MIXER    MIXER_QUADP
@@ -47,6 +47,7 @@
 
 #define USE_CLI_DEBUG_PRINT
 #define USE_I2C_RCOUT
+#define USE_RC_INPUT
 #define USE_LEDX
 #define LEDX0_PIN               PC13 
 
@@ -65,24 +66,26 @@
 #define SERIAL_PORT_COUNT       1 //VCP, USART1, USART2, SOFTSERIAL1, SOFTSERIAL2
 
 
-#define USE_I2C_SLAVE
+#define USE_I2C_SLAVE   // enable slave functions
 
 #define USE_I2C
 #define USE_I2C_DEVICE_1
 #define I2C1_SDA                PB7
 #define I2C1_SCL                PB6
-#define I2C1_ADDRESS            0x66
+#define I2C1_ADDRESS            0x66  // non zero address means slave
+#define I2C1_ADDRESS_2          0x29
 
 #define USE_I2C_DEVICE_3
 #define I2C3_SDA                PB4
 #define I2C3_SCL                PA8
-#define I2C3_ADDRESS            0x48
+#define I2C3_ADDRESS            0x48 // non zero address means slave
+#define I2C3_ADDRESS_2          0x30
 
 // RCINT:
 #define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
-#define USE_RCINT_I2C           
-#define USE_RCOUT_I2C         I2CDEV_1
+#define USE_RCOUT_I2C           I2CDEV_1
 #define USE_BATTERY_I2C         I2CDEV_3
+//#define USE_RC_INPUT_I2C        I2CDEV_3
 #define USE_SPI
 #define USE_SPI_DEVICE_1 
 #define SPI1_SCK_PIN            NONE
@@ -102,11 +105,6 @@
 #define SPI3_MISO_PIN           NONE
 #define SPI3_MOSI_PIN           NONE
 
-// #define USE_ADC
-// //#define ADC_INSTANCE            ADC1  
-// //#define ADC1_DMA_OPT            0  // DMA 2 Stream 0 Channel 0 
-// #define VBAT_ADC_PIN            PA1
-// #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
 #define MAX_VOLTAGE_SENSOR_ADC  6
 #define USE_ADC
 #define USE_BATTERY
@@ -125,21 +123,14 @@
 #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ADC
 
 
-// #define DEFAULT_VOLTAGE_METER_SOURCE VOLTAGE_METER_ESC
-// #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ESC
-// #define USE_ACC
-// #define USE_ACC_SPI_MPU9250
 
 
 
-//#define SERIALRX_UART           SERIAL_PORT_USART2
 
 #define USE_TRANSPONDER
 
 #define DEFAULT_RX_FEATURE      FEATURE_RX_PARALLEL_PWM
-//#define SERIALRX_PROVIDER       SERIALRX_SBUS
 
-//#define DEFAULT_FEATURES        (FEATURE_OSD | FEATURE_SOFTSERIAL | FEATURE_ESC_SENSOR)
 
 
 
@@ -152,5 +143,5 @@
 #define USE_PWM_OUTPUT
 #define USE_MOTOR
 
-#define USABLE_TIMER_CHANNEL_COUNT 12
+#define USABLE_TIMER_CHANNEL_COUNT 13
 #define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3)|TIM_N(4))

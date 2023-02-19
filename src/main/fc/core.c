@@ -1259,10 +1259,10 @@ static FAST_CODE_NOINLINE void subTaskRcCommand(timeUs_t currentTimeUs)
                 && mixerConfig()->mixerMode != MIXER_FLYING_WING
 #endif
     ) {
-        resetYawAxis();
+        // resetYawAxis();MHEFNY
     }
 
-    processRcCommand();
+    //processRcCommand(); MHEFNY
 }
 
 FAST_CODE void taskGyroSample(timeUs_t currentTimeUs)

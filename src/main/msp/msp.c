@@ -3149,7 +3149,7 @@ static mspResult_e mspProcessInCommand(mspDescriptor_t srcDesc, int16_t cmdMSP, 
 
         pidInitConfig(currentPidProfile);
         initEscEndpoints();
-        mixerInitProfile();
+        //mixerInitProfile();
 
         break;
     case MSP_SET_SENSOR_CONFIG:

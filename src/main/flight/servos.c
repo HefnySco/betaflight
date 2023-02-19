@@ -259,7 +259,7 @@ static void servoConfigureOutput(void)
 void servosInit(void)
 {
     // enable servos for mixes that require them. note, this shifts motor counts.
-    useServo = mixers[getMixerMode()].useServo;
+    //useServo = mixers[getMixerMode()].useServo;
     // if we want camstab/trig, that also enables servos, even if mixer doesn't
     if (featureIsEnabled(FEATURE_SERVO_TILT) || featureIsEnabled(FEATURE_CHANNEL_FORWARDING)) {
         useServo = 1;
