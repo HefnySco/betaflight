@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "platform.h"
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
 #include "config/config.h"
 #include "drivers/i2c_rcout.h"
 #include "cli/cli.h"
@@ -164,9 +164,10 @@ void i2c_rcout_toggleMotor()
     }
 }
 
-/*
-// called by subTaskMotorUpdate
-*/
+/**
+ * @brief called by subTaskMotorUpdate at 1000Hz
+ * 
+ */
 void i2c_rcout_writeMotors ()
 {
     if (status & RCOUT_OUTPUT_LOCKED) {
@@ -185,6 +186,10 @@ void i2c_rcout_writeReadEeprom()
 }
 
 
+/**
+ * @brief This tasks handles logic of reading safety buttins and time out and disabling motors.
+ * Thi is a 10Hz task.
+ */
 void i2c_rcout_execute()
 {
     static uint16_t led_counter =0;
@@ -374,6 +379,9 @@ void i2c_rcout_getReply(const uint8_t cmd, uint8_t *ret, uint8_t* length)
         
     switch (cmd)
     {
+        case STM32_RCOUT_GET_MOTOR_COUNT:
+        ret[0] =  MAX_SUPPORTED_MOTORS;
+        return ;
         case STM32_RCOUT_REGID:
         ret[0] =  STM32_RCOUT_REGID_VALUE;
         return ;

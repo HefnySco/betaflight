@@ -1003,7 +1003,7 @@ void init(void)
     motorPostInit();
     motorEnable();
 #endif
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
     i2c_rcout_init();
 #endif
 

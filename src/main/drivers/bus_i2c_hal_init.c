@@ -65,6 +65,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C1),
         .ev_irq = I2C1_EV_IRQn,
         .er_irq = I2C1_ER_IRQn,
+        #ifdef I2C1_ADDRESS_2
+        .second_address = I2C1_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_2
@@ -76,6 +81,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C2),
         .ev_irq = I2C2_EV_IRQn,
         .er_irq = I2C2_ER_IRQn,
+        #ifdef I2C2_ADDRESS_2
+        .second_address = I2C2_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_3
@@ -87,6 +97,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C3),
         .ev_irq = I2C3_EV_IRQn,
         .er_irq = I2C3_ER_IRQn,
+        #ifdef I2C3_ADDRESS_2
+        .second_address = I2C3_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_4
@@ -98,6 +113,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C4),
         .ev_irq = I2C4_EV_IRQn,
         .er_irq = I2C4_ER_IRQn,
+        #ifdef USE_I2C_DEVICE_4_2ND_ADDRE
+        .second_address = I2C4_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #elif defined(STM32H7)
@@ -110,6 +130,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1L(I2C1),
         .ev_irq = I2C1_EV_IRQn,
         .er_irq = I2C1_ER_IRQn,
+        #ifdef I2C1_ADDRESS_2
+        .second_address = I2C1_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_2
@@ -121,6 +146,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1L(I2C2),
         .ev_irq = I2C2_EV_IRQn,
         .er_irq = I2C2_ER_IRQn,
+        #ifdef I2C2_ADDRESS_2
+        .second_address = I2C2_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_3
@@ -132,6 +162,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1L(I2C3),
         .ev_irq = I2C3_EV_IRQn,
         .er_irq = I2C3_ER_IRQn,
+        #ifndef I2C3_ADDRESS_2
+        .second_address = I2C3_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_4
@@ -143,6 +178,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB4(I2C4),
         .ev_irq = I2C4_EV_IRQn,
         .er_irq = I2C4_ER_IRQn,
+        #ifdef USE_I2C_DEVICE_4_2ND_ADDRE
+        .second_address = I2C4_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #elif defined(STM32G4)
@@ -159,6 +199,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB11(I2C1),
         .ev_irq = I2C1_EV_IRQn,
         .er_irq = I2C1_ER_IRQn,
+        #ifdef I2C1_ADDRESS_2
+        .second_address = I2C1_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_2
@@ -170,6 +215,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB11(I2C2),
         .ev_irq = I2C2_EV_IRQn,
         .er_irq = I2C2_ER_IRQn,
+        #ifdef I2C2_ADDRESS_2
+        .second_address = I2C2_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_3
@@ -181,6 +231,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB11(I2C3),
         .ev_irq = I2C3_EV_IRQn,
         .er_irq = I2C3_ER_IRQn,
+        #ifdef I2C3_ADDRESS_2
+        .second_address = I2C3_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_4
@@ -196,6 +251,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB12(I2C4),
         .ev_irq = I2C4_EV_IRQn,
         .er_irq = I2C4_ER_IRQn,
+        #ifdef USE_I2C_DEVICE_4_2ND_ADDRE
+        .second_address = I2C4_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #endif

@@ -1213,7 +1213,7 @@ static FAST_CODE void subTaskMotorUpdate(timeUs_t currentTimeUs)
     } else if ((debugMode == DEBUG_PIDLOOP) || (debugMode == DEBUG_MOTORLOOP)) {
         startTime = micros();
     }
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
     i2c_rcout_writeMotors();
     // writeMotors();
     // return ;

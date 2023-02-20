@@ -311,12 +311,15 @@ static void pwmEdgeCallback(timerCCHandlerRec_t *cbRec, captureCompare_t capture
         // compute and store capture
         pwmInputPort->capture = pwmInputPort->fall - pwmInputPort->rise;
         captures[pwmInputPort->channel] = pwmInputPort->capture;
-        if (pwmInputPort->channel<4)
+        #ifdef USE_RCINPUT_I2C_DEBUG
+        
+        if ((pwmInputPort->channel>=USE_RCINPUT_I2C_DEBUG) && (pwmInputPort->channel<USE_RCINPUT_I2C_DEBUG+4))
         {
-            //MHEFNY: HERE IS THE PWM
-            debug[pwmInputPort->channel] = pwmInputPort->capture;
-            //debug[1] = pwmInputPort->channel;
+            
+            debug[pwmInputPort->channel-USE_RCINPUT_I2C_DEBUG] = pwmInputPort->capture;
         }
+        #endif
+        
     
         // switch state
         pwmInputPort->state = 0;

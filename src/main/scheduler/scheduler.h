@@ -189,7 +189,7 @@ typedef enum {
 #ifdef USE_CRSF_V3
     TASK_SPEED_NEGOTIATION,
 #endif
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
     TASK_I2CRCOUT,
 #endif
     /* Count of real tasks */

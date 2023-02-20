@@ -51,6 +51,7 @@ typedef struct i2cHardware_s {
     rccPeriphTag_t rcc;
     uint8_t ev_irq;
     uint8_t er_irq;
+    uint8_t second_address;
 } i2cHardware_t;
 
 extern const i2cHardware_t i2cHardware[];

@@ -33,6 +33,7 @@
 #include "drivers/nvic.h"
 #include "drivers/rcc.h"
 #include "drivers/i2c_rcout.h"
+#include "drivers/i2c_rcinput.h"
 #include "drivers/i2c_battery.h"
 
 #include "drivers/bus_i2c.h"
@@ -50,13 +51,16 @@
 // Allow 500us for clock strech to complete during unstick
 #define UNSTICK_CLK_STRETCH (500/UNSTICK_CLK_US)
 
+#if (I2C1_ADDRESS == 0) || (I2C2_ADDRESS == 0) || (I2C3_ADDRESS == 0)
 static void i2c_er_handler(I2CDevice device);
-
 static void i2c_ev_handler(I2CDevice device);
-#ifdef USE_I2C_SLAVE
+#endif
+
+#if (I2C1_ADDRESS != 0) || (I2C2_ADDRESS != 0) || (I2C3_ADDRESS != 0)
 static void i2c_ev_slave_handler (I2CDevice device);
 static void i2c_er_slave_handler(I2CDevice device);
 #endif 
+
 static void i2cUnstick(IO_t scl, IO_t sda);
 
 #ifdef STM32F4
@@ -82,6 +86,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C1),
         .ev_irq = I2C1_EV_IRQn,
         .er_irq = I2C1_ER_IRQn,
+        #ifdef I2C1_ADDRESS_2
+        .second_address = I2C1_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_2
@@ -109,6 +118,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C2),
         .ev_irq = I2C2_EV_IRQn,
         .er_irq = I2C2_ER_IRQn,
+        #ifdef I2C2_ADDRESS_2
+        .second_address = I2C2_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 #ifdef USE_I2C_DEVICE_3
@@ -130,6 +144,11 @@ const i2cHardware_t i2cHardware[I2CDEV_COUNT] = {
         .rcc = RCC_APB1(I2C3),
         .ev_irq = I2C3_EV_IRQn,
         .er_irq = I2C3_ER_IRQn,
+        #ifdef I2C3_ADDRESS_2
+        .second_address = I2C3_ADDRESS_2,
+        #else
+        .second_address = 0,
+        #endif
     },
 #endif
 };
@@ -323,7 +342,7 @@ bool i2cRead(I2CDevice device, uint8_t addr_, uint8_t reg_, uint8_t len, uint8_t
     return i2cReadBuffer(device, addr_, reg_, len, buf) && i2cWait(device);
 }
 
-#ifdef USE_I2C_SLAVE
+#if (I2C1_ADDRESS != 0) || (I2C2_ADDRESS != 0) || (I2C3_ADDRESS != 0)
 static void i2c_er_slave_handler (I2CDevice device)
 {
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
@@ -373,6 +392,9 @@ static void i2c_er_slave_handler (I2CDevice device)
     
 }
 #endif 
+
+#if (I2C1_ADDRESS == 0) || (I2C2_ADDRESS == 0) || (I2C3_ADDRESS == 0)
+
 static void i2c_er_handler(I2CDevice device)
 {
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
@@ -405,8 +427,7 @@ static void i2c_er_handler(I2CDevice device)
     I2Cx->SR1 &= ~(I2C_SR1_BERR | I2C_SR1_ARLO | I2C_SR1_AF | I2C_SR1_OVR);     // reset all the error bits to clear the interrupt
     state->busy = 0;
 }
-
-
+#endif
 
 //Clear ADDR by reading SR1, then SR2
 void I2C_clear_ADDR(I2C_TypeDef* I2Cx) {
@@ -420,10 +441,10 @@ void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
 	I2C_Cmd(I2Cx, ENABLE);
 }
 
-#ifdef USE_I2C_SLAVE
+#if (I2C1_ADDRESS != 0) || (I2C2_ADDRESS != 0) || (I2C3_ADDRESS != 0)
     
-static uint8_t data_in[2][3];
-static uint8_t data_in_index[2];
+static uint8_t data_in[3][3];
+static uint8_t data_in_index[3];
 static uint8_t indexx = 0;
 char msg[80];
 void i2c_ev_slave_handler(I2CDevice device)
@@ -443,10 +464,14 @@ void i2c_ev_slave_handler(I2CDevice device)
             indexx=0;
             break;
     #endif
-
-    #ifdef USE_BATTERY
-        case  USE_BATTERY_I2C:
+    #ifdef USE_ADC_I2C
+        case  USE_ADC_I2C:
             indexx=1;
+            break;
+    #endif
+    #ifdef USE_RCINPUT_I2C
+        case  USE_RCINPUT_I2C:
+            indexx=2;
             break;
     #endif
         default:
@@ -460,16 +485,30 @@ void i2c_ev_slave_handler(I2CDevice device)
     {
         I2C_clear_STOPF(I2Cx);
         
+    //     if (cliMode) {
+    //      volatile uint16_t Address1 = I2Cx->OAR1;
+    //      volatile uint16_t Address2 = I2Cx->OAR2;
+    //      char msg[80];
+    //      sprintf(msg,"set ADD %d - %d\n", Address1,Address2);
+    //      cliPrintLine(msg);
+    //  }
+
 #ifdef USE_RCOUT_I2C
     if (device == USE_RCOUT_I2C)
     {
         i2c_rcout_parseCommand(data_in[indexx][0], (data_in[indexx][2] << 8) | data_in[indexx][1] );
     }
 #endif
-#ifdef USE_BATTERY
-    if (device == USE_BATTERY_I2C)
+#ifdef USE_ADC_I2C
+    if (device == USE_ADC_I2C)
     {
         i2c_battery_parseCommand(data_in[indexx][0], data_in[indexx][1]);
+    }
+#endif
+#ifdef USE_RCINPUT_I2C
+    if (device == USE_RCINPUT_I2C)
+    {
+        i2c_rcin_parseCommand(data_in[indexx][0], (data_in[indexx][2] << 8) | data_in[indexx][1] );
     }
 #endif
         return ;
@@ -505,8 +544,14 @@ void i2c_ev_slave_handler(I2CDevice device)
                 i2c_rcout_getReply(data_in[indexx][0], ret, &length);
             }
         #endif
-        #ifdef USE_BATTERY
-            if (device == USE_BATTERY_I2C)
+        #ifdef USE_RCINPUT_I2C
+            if (device == USE_RCINPUT_I2C)
+            {
+                i2c_rcin_getReply(data_in[indexx][0], ret, &length);
+            }
+        #endif
+        #ifdef USE_ADC_I2C
+            if (device == USE_ADC_I2C)
             {
                 i2c_battery_getReply(data_in[indexx][0], ret, &length);
             }
@@ -540,6 +585,8 @@ void i2c_ev_slave_handler(I2CDevice device)
 }
 
 #endif
+
+#if (I2C1_ADDRESS == 0) || (I2C2_ADDRESS == 0) || (I2C3_ADDRESS == 0)
 
 void i2c_ev_handler(I2CDevice device) {
 	
@@ -655,6 +702,7 @@ void i2c_ev_handler(I2CDevice device) {
         state->busy = 0;
     }
 }
+#endif
 
 void i2cInit(I2CDevice device)
 {
@@ -701,6 +749,11 @@ void i2cInit(I2CDevice device)
     if (pDev->address!=0)
     {
         I2C_ITConfig(I2Cx, I2C_IT_EVT | I2C_IT_ERR, ENABLE);               // SLAVE Mode
+        if (hw->second_address!=0)
+        {
+            I2C_DualAddressCmd(I2Cx,true);
+            I2C_OwnAddress2Config(I2Cx, hw->second_address << 1);
+        }
     }
     else
     {

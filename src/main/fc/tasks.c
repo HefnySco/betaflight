@@ -198,15 +198,6 @@ static void taskUpdateRxMain(timeUs_t currentTimeUs)
     rxState_e oldRxState = rxState;
     timeDelta_t anticipatedExecutionTime;
 
-    //debug[1] = ++c;
-    // if (cliMode) {
-    //     cliPrintLine("Here");
-    // }
-    // Where we are using a state machine call schedulerIgnoreTaskExecRate() for all states bar one
-    // if (rxState != RX_STATE_UPDATE) {
-    //     schedulerIgnoreTaskExecRate();
-    // }
-
     switch (rxState) {
     default:
     case RX_STATE_CHECK:
@@ -289,7 +280,7 @@ static void taskUpdateMag(timeUs_t currentTimeUs)
 }
 #endif
 
-#if defined (USE_I2C_RCOUT)
+#if defined (USE_RCOUT_I2C)
 void taskUpdateI2CRcout(timeUs_t currentTimeUs)
 {
     UNUSED(currentTimeUs);
@@ -411,7 +402,7 @@ task_attribute_t task_attributes[TASK_COUNT] = {
 #endif
 #endif
 #ifdef USE_TASK_RX
-    [TASK_RX] = DEFINE_TASK("RX", NULL, NULL, taskUpdateRxMain, TASK_PERIOD_HZ(250), TASK_PRIORITY_HIGH), // If event-based scheduling doesn't work, fallback to periodic scheduling
+    [TASK_RX] = DEFINE_TASK("RX", NULL, NULL, taskUpdateRxMain, TASK_PERIOD_HZ(1), TASK_PRIORITY_HIGH), // If event-based scheduling doesn't work, fallback to periodic scheduling
 #endif
 
 [TASK_DISPATCH] = DEFINE_TASK("DISPATCH", NULL, NULL, dispatchProcess, TASK_PERIOD_HZ(1000), TASK_PRIORITY_HIGH),
@@ -420,7 +411,7 @@ task_attribute_t task_attributes[TASK_COUNT] = {
     [TASK_BEEPER] = DEFINE_TASK("BEEPER", NULL, NULL, beeperUpdate, TASK_PERIOD_HZ(100), TASK_PRIORITY_LOW),
 #endif
 
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
     [TASK_I2CRCOUT] = DEFINE_TASK("I2CRCOUT", NULL, NULL, taskUpdateI2CRcout, TASK_PERIOD_HZ(10), TASK_PRIORITY_HIGH),
 #endif
 
@@ -584,7 +575,7 @@ void tasksInit(void)
     setTaskEnabled(TASK_BEEPER, true);
 #endif
 
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
     setTaskEnabled(TASK_I2CRCOUT, true);
 #endif
         

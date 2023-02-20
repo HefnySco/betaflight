@@ -32,6 +32,7 @@ COMMON_SRC = \
             drivers/exti.c \
             drivers/io.c \
             drivers/i2c_rcout.c \
+            drivers/i2c_rcinput.c \
             drivers/i2c_battery.c \
             drivers/light_led.c \
             drivers/light_ledx.c \
@@ -311,6 +312,8 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             drivers/display_ug2864hsweg01.c \
             drivers/inverter.c \
             drivers/i2c_rcout.c \
+            drivers/i2c_rcinput.c \
+            drivers/i2c_battery.c \
             drivers/light_ws2811strip.c \
             drivers/light_ws2811strip_hal.c \
             drivers/light_ws2811strip_stdperiph.c \

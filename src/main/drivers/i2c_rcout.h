@@ -1,9 +1,11 @@
 #pragma once
 
-#ifdef USE_I2C_RCOUT
+#ifdef USE_RCOUT_I2C
 
 #define STM32_RCOUT_REGID_VALUE     0x91
 #define CMD_MOTOR_DISABLED          0x0
+
+
 
 
 
@@ -22,6 +24,15 @@
  */
 #define STM32_RCOUT_TIMEOUT             0xFB
 #define STM32_RCOUT_CHANGE_PWM_PROTOCOL 0xFE
+
+
+/**
+* @brief gets number of motors currently supported.
+* this can be determined in MAX_SUPPORTED_MOTORS in target.h
+* 
+*/
+#define STM32_RCOUT_GET_MOTOR_COUNT     0xFC
+
 /**
  * @brief gets module signature
  * 

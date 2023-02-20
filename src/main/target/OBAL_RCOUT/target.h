@@ -25,7 +25,8 @@
 #define USE_TARGET_CONFIG
 
 //#define INVERTER_PIN_UART2      PC14
-#define MAX_SUPPORTED_MOTORS   8
+#define MAX_SUPPORTED_MOTORS   4
+#define MAX_SUPPORTED_RCINPUT  4
 
 ////HOW MANY MOTORS
 #define DEFAULT_MIXER    MIXER_QUADP
@@ -42,12 +43,12 @@
 #define TASK_ACC_DESIRED_PERIOD 10
 #define USE_BUTTONS
 #define BUTTON_A_PIN            PA0
-   
+#define USE_RCINPUT_I2C_DEBUG   0x2 // from 0 to total -4
+//#define DEBUG_ADC_CHANNELS
 ///////END TASKS
 
 #define USE_CLI_DEBUG_PRINT
-#define USE_I2C_RCOUT
-#define USE_RC_INPUT
+
 #define USE_LEDX
 #define LEDX0_PIN               PC13 
 
@@ -66,26 +67,32 @@
 #define SERIAL_PORT_COUNT       1 //VCP, USART1, USART2, SOFTSERIAL1, SOFTSERIAL2
 
 
-#define USE_I2C_SLAVE   // enable slave functions
 
 #define USE_I2C
 #define USE_I2C_DEVICE_1
 #define I2C1_SDA                PB7
 #define I2C1_SCL                PB6
 #define I2C1_ADDRESS            0x66  // non zero address means slave
-#define I2C1_ADDRESS_2          0x29
+
+
+#define USE_I2C_DEVICE_2
+#define I2C2_SDA                PB3
+#define I2C2_SCL                PB10
+#define I2C2_ADDRESS            0x27  // non zero address means slave
+
 
 #define USE_I2C_DEVICE_3
 #define I2C3_SDA                PB4
 #define I2C3_SCL                PA8
 #define I2C3_ADDRESS            0x48 // non zero address means slave
-#define I2C3_ADDRESS_2          0x30
+#define I2C3_ADDRESS_2          0x33
 
 // RCINT:
 #define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
 #define USE_RCOUT_I2C           I2CDEV_1
-#define USE_BATTERY_I2C         I2CDEV_3
-//#define USE_RC_INPUT_I2C        I2CDEV_3
+#define USE_RCINPUT_I2C         I2CDEV_2
+#define USE_ADC_I2C             I2CDEV_3
+
 #define USE_SPI
 #define USE_SPI_DEVICE_1 
 #define SPI1_SCK_PIN            NONE
@@ -114,9 +121,9 @@
 //#define DEBUG_ADC_CHANNELS
 #define VBAT_ADC_PIN            PA1
 #define CURRENT_METER_ADC_PIN   PA2
-#define EXTERNAL1_ADC_PIN       PA3
-#define EXTERNAL2_ADC_PIN       PA4
-#define EXTERNAL3_ADC_PIN       PA5
+#define EXTERNAL1_ADC_PIN       PA4
+#define EXTERNAL2_ADC_PIN       PA7
+//#define EXTERNAL3_ADC_PIN       PA7
   
 
 #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
@@ -143,5 +150,5 @@
 #define USE_PWM_OUTPUT
 #define USE_MOTOR
 
-#define USABLE_TIMER_CHANNEL_COUNT 13
-#define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3)|TIM_N(4))
+#define USABLE_TIMER_CHANNEL_COUNT 10
+#define USED_TIMERS             (TIM_N(1)|TIM_N(2)|TIM_N(3)|TIM_N(4)|TIM_N(10))
