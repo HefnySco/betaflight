@@ -446,7 +446,6 @@ void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
 static uint8_t data_in[3][3];
 static uint8_t data_in_index[3];
 static uint8_t indexx = 0;
-char msg[80];
 void i2c_ev_slave_handler(I2CDevice device)
 {
 
