@@ -534,22 +534,27 @@ void i2c_ev_slave_handler(I2CDevice device)
         {   // i2cget... waiting data from slave
             // this is called after sending register id.
             data_in[driver_index][data_in_index[driver_index]] = (uint8_t)I2Cx->DR;
-            uint8_t ret[2];
-            uint8_t length;
+            uint8_t ret[2] = {0,0};
+            uint8_t length = 1;
+            if (false)
+            {
+                return ;
+            }
+            
         #ifdef USE_RCOUT_I2C
-            if (device == USE_RCOUT_I2C)
+            else if (device == USE_RCOUT_I2C)
             {
                 i2c_rcout_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_RCINPUT_I2C
-            if (device == USE_RCINPUT_I2C)
+            else if (device == USE_RCINPUT_I2C)
             {
                 i2c_rcin_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_ADC_I2C
-            if (device == USE_ADC_I2C)
+            else if (device == USE_ADC_I2C)
             {
                 i2c_battery_getReply(data_in[driver_index][0], ret, &length);
             }

@@ -31,6 +31,10 @@
 ////HOW MANY MOTORS
 #define DEFAULT_MIXER    MIXER_QUADP
 
+// How MANY RCINT CHANNELS
+#define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
+
+
 //// TASKS SECTION
 #undef USE_CAMERA_CONTROL
 #undef USE_VTX_CONTROL
@@ -87,11 +91,13 @@
 #define I2C3_ADDRESS            0x33 // non zero address means slave
 #define I2C3_ADDRESS_2          0x48
 
-// RCINT:
-#define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
 #define USE_RCOUT_I2C           I2CDEV_1
 #define USE_RCINPUT_I2C         I2CDEV_2
 #define USE_ADC_I2C             I2CDEV_3
+
+
+
+
 
 #define USE_SPI
 #define USE_SPI_DEVICE_1 

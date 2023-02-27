@@ -367,12 +367,12 @@ void i2c_rcout_parseCommand(const uint8_t cmd, const uint16_t value)
 void i2c_rcout_getReply(const uint8_t cmd, uint8_t *ret, uint8_t* length)
 {
 
-    if (cmd < MAX_SUPPORTED_MOTORS)
-    {   // motor values.
-        ret[0] = i2crcout_motor_values[cmd];
-        *length = 1;
-        return ;
-    }
+    // if (cmd < MAX_SUPPORTED_MOTORS)
+    // {   // motor values.
+    //     ret[0] = i2crcout_motor_values[cmd];
+    //     *length = 1;
+    //     return ;
+    // }
 
 
     *length = 1;
