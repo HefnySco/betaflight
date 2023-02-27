@@ -445,11 +445,9 @@ void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
     
 static uint8_t data_in[3][3];
 static uint8_t data_in_index[3];
-static uint8_t indexx = 0;
+static uint8_t driver_index = 0;
 void i2c_ev_slave_handler(I2CDevice device)
 {
-
- 
 
     I2C_TypeDef *I2Cx = i2cDevice[device].hardware->reg;
 
@@ -460,21 +458,21 @@ void i2c_ev_slave_handler(I2CDevice device)
     {
     #ifdef USE_RCOUT_I2C
         case USE_RCOUT_I2C:
-            indexx=0;
+            driver_index=0;
             break;
     #endif
     #ifdef USE_ADC_I2C
         case  USE_ADC_I2C:
-            indexx=1;
+            driver_index=1;
             break;
     #endif
     #ifdef USE_RCINPUT_I2C
         case  USE_RCINPUT_I2C:
-            indexx=2;
+            driver_index=2;
             break;
     #endif
         default:
-            indexx=0;
+            driver_index=0;
         break;
     }
 
@@ -495,21 +493,22 @@ void i2c_ev_slave_handler(I2CDevice device)
 #ifdef USE_RCOUT_I2C
     if (device == USE_RCOUT_I2C)
     {
-        i2c_rcout_parseCommand(data_in[indexx][0], (data_in[indexx][2] << 8) | data_in[indexx][1] );
+        i2c_rcout_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
     }
 #endif
 #ifdef USE_ADC_I2C
     if (device == USE_ADC_I2C)
     {
-        i2c_battery_parseCommand(data_in[indexx][0], data_in[indexx][1]);
+        i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
     }
 #endif
 #ifdef USE_RCINPUT_I2C
     if (device == USE_RCINPUT_I2C)
     {
-        i2c_rcin_parseCommand(data_in[indexx][0], (data_in[indexx][2] << 8) | data_in[indexx][1] );
+        i2c_rcin_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
     }
 #endif
+        memset (data_in[driver_index],0,3);
         return ;
     }
 
@@ -527,32 +526,32 @@ void i2c_ev_slave_handler(I2CDevice device)
       &&(I2C_SRX_ADDR[1] & I2C_SR2_BUSY))
     {
         
-		data_in_index[indexx] = 0;
-        memset (data_in[indexx],0,3);
+		data_in_index[driver_index] = 0;
+        memset (data_in[driver_index],0,3);
 
         
         if (I2C_SRX_ADDR[1] & I2C_SR2_TRA)
         {   // i2cget... waiting data from slave
             // this is called after sending register id.
-            data_in[indexx][data_in_index[indexx]] = (uint8_t)I2Cx->DR;
+            data_in[driver_index][data_in_index[driver_index]] = (uint8_t)I2Cx->DR;
             uint8_t ret[2];
             uint8_t length;
         #ifdef USE_RCOUT_I2C
             if (device == USE_RCOUT_I2C)
             {
-                i2c_rcout_getReply(data_in[indexx][0], ret, &length);
+                i2c_rcout_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_RCINPUT_I2C
             if (device == USE_RCINPUT_I2C)
             {
-                i2c_rcin_getReply(data_in[indexx][0], ret, &length);
+                i2c_rcin_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_ADC_I2C
             if (device == USE_ADC_I2C)
             {
-                i2c_battery_getReply(data_in[indexx][0], ret, &length);
+                i2c_battery_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
             // send reply values to master
@@ -573,13 +572,13 @@ void i2c_ev_slave_handler(I2CDevice device)
     if (I2C_SRX_ADDR[0] & I2C_SR1_RXNE)
     {   // i2cset ... 
         // Reading parameters here.
-        if (data_in_index[indexx]>2)  
+        if (data_in_index[driver_index]>2)  
         {
-            data_in_index[indexx] = 0; 
+            data_in_index[driver_index] = 0; 
             return ;
         }
-        data_in[indexx][data_in_index[indexx]] = (uint8_t)I2Cx->DR;
-        ++data_in_index[indexx];
+        data_in[driver_index][data_in_index[driver_index]] = (uint8_t)I2Cx->DR;
+        ++data_in_index[driver_index];
     }
 }
 

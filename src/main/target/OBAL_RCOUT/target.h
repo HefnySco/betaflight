@@ -84,8 +84,8 @@
 #define USE_I2C_DEVICE_3
 #define I2C3_SDA                PB4
 #define I2C3_SCL                PA8
-#define I2C3_ADDRESS            0x48 // non zero address means slave
-#define I2C3_ADDRESS_2          0x33
+#define I2C3_ADDRESS            0x33 // non zero address means slave
+#define I2C3_ADDRESS_2          0x48
 
 // RCINT:
 #define PWM_PORTS_OR_PPM_CAPTURE_COUNT  6
