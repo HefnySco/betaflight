@@ -45,7 +45,7 @@
 #define TASK_ACC_DESIRED_PERIOD 10
 #define USE_BUTTONS
 #define BUTTON_A_PIN            PA0
-#define USE_RCINPUT_I2C_PWM_DEBUG   0x2 // from 0 to total -4
+#define USE_RCINPUT_I2C_PWM_DEBUG   0x01 // from 1 to total 4
 //#define DEBUG_ADC_CHANNELS
 ///////END TASKS
 

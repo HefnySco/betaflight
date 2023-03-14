@@ -240,7 +240,6 @@ static void ppmEdgeCallback(timerCCHandlerRec_t* cbRec, captureCompare_t capture
                 captures[i] = PPM_RCVR_TIMEOUT;
             }
             ppmFrameCount++;
-            debug[3] = ppmFrameCount; //ppmDev.deltaTime;
         }
 
         ppmDev.tracking   = true;
@@ -251,13 +250,12 @@ static void ppmEdgeCallback(timerCCHandlerRec_t* cbRec, captureCompare_t capture
            if no valid frame is found otherwise we ride over it */
     } else if (ppmDev.tracking) {
         /* Valid pulse duration 0.75 to 2.5 ms*/
-        debug[0] = ppmDev.captures[0];
-        debug[1] = ppmDev.captures[1];
-        debug[2] = ppmDev.captures[2];
+            
         if (ppmDev.deltaTime > PPM_IN_MIN_CHANNEL_PULSE_US
             && ppmDev.deltaTime < PPM_IN_MAX_CHANNEL_PULSE_US
             && ppmDev.pulseIndex < PPM_IN_MAX_NUM_CHANNELS) {
-            ppmDev.captures[ppmDev.pulseIndex] = ppmDev.deltaTime;
+            captures[ppmDev.pulseIndex] = ppmDev.deltaTime;
+            //ppmDev.captures[ppmDev.pulseIndex] = ppmDev.deltaTime;
             ppmDev.pulseIndex++;
         } else {
             /* Not a valid pulse duration */
@@ -266,6 +264,14 @@ static void ppmEdgeCallback(timerCCHandlerRec_t* cbRec, captureCompare_t capture
                 ppmDev.captures[i] = PPM_RCVR_TIMEOUT;
             }
         }
+
+        #ifdef USE_RCINPUT_I2C_PWM_DEBUG
+        if ((ppmDev.pulseIndex>=(uint8_t)USE_RCINPUT_I2C_PWM_DEBUG) && (ppmDev.pulseIndex<USE_RCINPUT_I2C_PWM_DEBUG+4))
+        {
+            debug[ppmDev.pulseIndex-USE_RCINPUT_I2C_PWM_DEBUG+1] = captures[ppmDev.pulseIndex];
+        }
+        #endif
+        
     }
 }
 
@@ -316,10 +322,9 @@ static void pwmEdgeCallback(timerCCHandlerRec_t *cbRec, captureCompare_t capture
         captures[pwmInputPort->channel] = pwmInputPort->capture;
         #ifdef USE_RCINPUT_I2C_PWM_DEBUG
         
-        if ((pwmInputPort->channel>=USE_RCINPUT_I2C_PWM_DEBUG) && (pwmInputPort->channel<USE_RCINPUT_I2C_PWM_DEBUG+4))
+        if ((pwmInputPort->channel>=(uint8_t)USE_RCINPUT_I2C_PWM_DEBUG) && (pwmInputPort->channel<USE_RCINPUT_I2C_PWM_DEBUG+4))
         {
-            
-            debug[pwmInputPort->channel-USE_RCINPUT_I2C_PWM_DEBUG] = pwmInputPort->capture;
+            debug[pwmInputPort->channel-USE_RCINPUT_I2C_PWM_DEBUG+1] = pwmInputPort->capture;
         }
         #endif
         
