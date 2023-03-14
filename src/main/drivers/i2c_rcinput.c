@@ -46,6 +46,16 @@ void i2c_rcin_getReply(const uint8_t cmd, uint8_t *ret, uint8_t* length)
         case STM32_RCINPUT_CH4_READ:
         case STM32_RCINPUT_CH5_READ:
         case STM32_RCINPUT_CH6_READ:
+        case STM32_RCINPUT_CH7_READ:
+        case STM32_RCINPUT_CH8_READ:
+        case STM32_RCINPUT_CH9_READ:
+        case STM32_RCINPUT_CH10_READ:
+        case STM32_RCINPUT_CH11_READ:
+        case STM32_RCINPUT_CH12_READ:
+        case STM32_RCINPUT_CH13_READ:
+        case STM32_RCINPUT_CH14_READ:
+        case STM32_RCINPUT_CH15_READ:
+        case STM32_RCINPUT_CH16_READ:
         {
             uint16_t pwm = pwmRead(cmd);
 
