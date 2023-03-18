@@ -158,15 +158,15 @@ static void taskHandleSerial(timeUs_t currentTimeUs)
 }
 
 #ifdef USE_BATTERY
-static void taskBatteryAlerts(timeUs_t currentTimeUs)
-{
-    if (!ARMING_FLAG(ARMED)) {
-        // the battery *might* fall out in flight, but if that happens the FC will likely be off too unless the user has battery backup.
-        batteryUpdatePresence();
-    }
-    batteryUpdateStates(currentTimeUs);
-    //batteryUpdateAlarms();  MHEFNY
-}
+// static void taskBatteryAlerts(timeUs_t currentTimeUs)
+// {
+//     if (!ARMING_FLAG(ARMED)) {
+//         // the battery *might* fall out in flight, but if that happens the FC will likely be off too unless the user has battery backup.
+//         batteryUpdatePresence();
+//     }
+//     batteryUpdateStates(currentTimeUs);
+//     //batteryUpdateAlarms();  MHEFNY
+// }
 #endif 
 
 #ifdef USE_ACC
@@ -379,9 +379,9 @@ task_attribute_t task_attributes[TASK_COUNT] = {
 
 //MHEFNY: NEW 
 #ifdef USE_BATTERY
-    [TASK_BATTERY_ALERTS] = DEFINE_TASK("BATTERY_ALERTS", NULL, NULL, taskBatteryAlerts, TASK_PERIOD_HZ(5), TASK_PRIORITY_MEDIUM),
-    [TASK_BATTERY_VOLTAGE] = DEFINE_TASK("BATTERY_VOLTAGE", NULL, NULL, batteryUpdateVoltage, TASK_PERIOD_HZ(SLOW_VOLTAGE_TASK_FREQ_HZ), TASK_PRIORITY_MEDIUM), // Freq may be updated in tasksInit
-    [TASK_BATTERY_CURRENT] = DEFINE_TASK("BATTERY_CURRENT", NULL, NULL, batteryUpdateCurrentMeter, TASK_PERIOD_HZ(50), TASK_PRIORITY_MEDIUM),
+    //[TASK_BATTERY_ALERTS] = DEFINE_TASK("BATTERY_ALERTS", NULL, NULL, taskBatteryAlerts, TASK_PERIOD_HZ(1), TASK_PRIORITY_MEDIUM),
+    [TASK_BATTERY_VOLTAGE] = DEFINE_TASK("BATTERY_VOLTAGE", NULL, NULL, batteryUpdateVoltage, TASK_PERIOD_HZ(V_SLOW_VOLTAGE_TASK_FREQ_HZ), TASK_PRIORITY_MEDIUM), // Freq may be updated in tasksInit
+    [TASK_BATTERY_CURRENT] = DEFINE_TASK("BATTERY_CURRENT", NULL, NULL, batteryUpdateCurrentMeter, TASK_PERIOD_HZ(V_SLOW_VOLTAGE_TASK_FREQ_HZ), TASK_PRIORITY_MEDIUM),
 #endif
 
 #ifdef USE_TRANSPONDER

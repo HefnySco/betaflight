@@ -22,6 +22,7 @@
 
 #include "voltage_ids.h"
 
+#define V_SLOW_VOLTAGE_TASK_FREQ_HZ 1
 #define SLOW_VOLTAGE_TASK_FREQ_HZ 50
 #define FAST_VOLTAGE_TASK_FREQ_HZ 200
 
