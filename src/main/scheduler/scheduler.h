@@ -192,6 +192,9 @@ typedef enum {
 #ifdef USE_RCOUT_I2C
     TASK_I2CRCOUT,
 #endif
+#ifdef USE_LEDX
+    TASK_I2CLEDX,
+#endif
     /* Count of real tasks */
     TASK_COUNT,
 

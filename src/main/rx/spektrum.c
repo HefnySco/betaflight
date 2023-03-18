@@ -276,14 +276,14 @@ void spektrumBind(rxConfig_t *rxConfig)
     LED1_OFF;
 
     for (int i = 0; i < rxConfig->spektrum_sat_bind; i++) {
-        LED0_OFF;
-        LED2_OFF;
+        //LED0_OFF;
+        //LED2_OFF;
         // RX line, drive low for 120us
         IOWrite(bindIO, false);
         delayMicroseconds(120);
 
-        LED0_ON;
-        LED2_ON;
+        //LED0_ON;
+        //LED2_ON;
         // RX line, drive high for 120us
         IOWrite(bindIO, true);
         delayMicroseconds(120);

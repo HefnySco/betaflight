@@ -49,6 +49,11 @@ void pgResetFn_statusLedxConfig(statusLedxConfig_t *statusLedxConfig)
     statusLedxConfig->ioTags[0] = IO_TAG(LEDX0_PIN);
     statusLedxConfig->ioTags[1] = IO_TAG(LEDX1_PIN);
     statusLedxConfig->ioTags[2] = IO_TAG(LEDX2_PIN);
+    statusLedxConfig->ioTags[3] = IO_TAG(LEDX0_PIN);
+    statusLedxConfig->ioTags[4] = IO_TAG(LEDX1_PIN);
+    statusLedxConfig->ioTags[5] = IO_TAG(LEDX2_PIN);
+    statusLedxConfig->ioTags[6] = IO_TAG(LEDX1_PIN);
+    statusLedxConfig->ioTags[7] = IO_TAG(LEDX2_PIN);
 
     statusLedxConfig->inversion = 0
 #ifdef LEDX0_INVERTED
@@ -59,6 +64,21 @@ void pgResetFn_statusLedxConfig(statusLedxConfig_t *statusLedxConfig)
 #endif
 #ifdef LEDX2_INVERTED
     | BIT(2)
+#endif
+#ifdef LEDX3_INVERTED
+    | BIT(3)
+#endif
+#ifdef LEDX4_INVERTED
+    | BIT(4)
+#endif
+#ifdef LEDX5_INVERTED
+    | BIT(5)
+#endif
+#ifdef LEDX6_INVERTED
+    | BIT(6)
+#endif
+#ifdef LEDX7_INVERTED
+    | BIT(7)
 #endif
     ;
 }
@@ -79,6 +99,12 @@ void ledxInit(const statusLedxConfig_t *statusLedConfig)
     LEDX0_OFF;
     LEDX1_OFF;
     LEDX2_OFF;
+    LEDX3_OFF;
+    LEDX4_OFF;
+    LEDX5_OFF;
+    LEDX6_OFF;
+    LEDX7_OFF;
+
 }
 
 void ledxToggle(int led)

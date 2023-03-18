@@ -2,14 +2,15 @@
 
 #ifdef USE_BATTERY
 
+#define STM32_ADC_MIN_CMD_ID        0x00
+#define STM32_ADC_MAX_CMD_ID        0x0F
+
 #define STM32_ADC_SENSOR_0      0x00
 #define STM32_ADC_SENSOR_1      0x01
 #define STM32_ADC_SENSOR_2  `   0x02
 #define STM32_ADC_SENSOR_3      0x03
 
-#define STM32_ADC_REGID             0xFF
-
-
+#define STM32_ADC_REGID             0x0F
 #define STM32_ADC_REGID_VALUE       0xFE
 
 

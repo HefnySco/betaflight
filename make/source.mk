@@ -34,6 +34,7 @@ COMMON_SRC = \
             drivers/i2c_rcout.c \
             drivers/i2c_rcinput.c \
             drivers/i2c_battery.c \
+            drivers/i2c_ledx.c \
             drivers/light_led.c \
             drivers/light_ledx.c \
             drivers/mco.c \

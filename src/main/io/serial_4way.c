@@ -62,8 +62,8 @@
 #define TX_LED_OFF LED1_OFF
 #define TX_LED_ON LED1_ON
 #else
-#define TX_LED_OFF LED0_OFF
-#define TX_LED_ON LED0_ON
+#define TX_LED_OFF 
+#define TX_LED_ON 
 #endif
 #else
 #define RX_LED_OFF

@@ -273,7 +273,7 @@ static bool accNeedsCalibration(void)
 void updateArmingStatus(void)
 {
     if (ARMING_FLAG(ARMED)) {
-        LED0_ON;
+        //LED0_ON;
     } else {
         // Check if the power on arming grace time has elapsed
         if ((getArmingDisableFlags() & ARMING_DISABLED_BOOT_GRACE_TIME) && (millis() >= systemConfig()->powerOnArmingGraceTime * 1000)
@@ -1216,7 +1216,7 @@ static FAST_CODE void subTaskMotorUpdate(timeUs_t currentTimeUs)
 #ifdef USE_RCOUT_I2C
     i2c_rcout_writeMotors();
     // writeMotors();
-    // return ;
+    return ;
 #else
     mixTable(currentTimeUs);
 

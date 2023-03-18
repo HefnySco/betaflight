@@ -4,7 +4,8 @@
 #include "config/config.h"
 #include "drivers/i2c_rcout.h"
 #include "cli/cli.h"
-#include "drivers/light_ledx.h"
+//#include "drivers/light_ledx.h"
+#include "drivers/light_led.h"
 #include "flight/mixer.h"
 #include "drivers/motor.h"
 #include "drivers/buttons.h"
@@ -241,19 +242,19 @@ void i2c_rcout_execute()
     dev = (status & RCOUT_STATUS_NO_INPUT)?4:2;    
     if (lock_by_user == true)
     {
-        LEDX0_OFF;
+        LED0_OFF;
     }
     else if (lock_by_cmd == true) 
     {
-        LEDX0_ON;
+        LED0_ON;
     }
     else if ((led_counter%dev)==0) 
     {
-        LEDX0_OFF;
+        LED0_OFF;
     }
     else
     {
-        LEDX0_ON;
+        LED0_ON;
     }
     led_counter++;
     

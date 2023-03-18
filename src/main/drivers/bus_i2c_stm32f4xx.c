@@ -35,6 +35,7 @@
 #include "drivers/i2c_rcout.h"
 #include "drivers/i2c_rcinput.h"
 #include "drivers/i2c_battery.h"
+#include "drivers/i2c_ledx.h"
 
 #include "drivers/bus_i2c.h"
 #include "drivers/bus_i2c_impl.h"
@@ -466,6 +467,16 @@ void i2c_ev_slave_handler(I2CDevice device)
             driver_index=1;
             break;
     #endif
+    #ifdef USE_LEDX_I2C
+        case  USE_LEDX_I2C:
+            driver_index=1;
+            break;
+    #endif
+    #ifdef USE_ADC_LEDX_I2C
+        case  USE_ADC_LEDX_I2C:
+            driver_index=1;
+            break;
+    #endif
     #ifdef USE_RCINPUT_I2C
         case  USE_RCINPUT_I2C:
             driver_index=2;
@@ -500,6 +511,19 @@ void i2c_ev_slave_handler(I2CDevice device)
     if (device == USE_ADC_I2C)
     {
         i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
+    }
+#endif
+#ifdef USE_LEDX_I2C
+    if (device == USE_LEDX_I2C)
+    {
+        i2c_ledx_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
+    }
+#endif
+#ifdef USE_ADC_LEDX_I2C
+    if (device == USE_ADC_LEDX_I2C)
+    {
+        i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
+        i2c_ledx_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
     }
 #endif
 #ifdef USE_RCINPUT_I2C
@@ -557,6 +581,22 @@ void i2c_ev_slave_handler(I2CDevice device)
             else if (device == USE_ADC_I2C)
             {
                 i2c_battery_getReply(data_in[driver_index][0], ret, &length);
+            }
+        #endif
+        #ifdef USE_LEDX_I2C
+            else if (device == USE_LEDX_I2C)
+            {
+                i2c_ledx_getReply(data_in[driver_index][0], ret, &length);
+            }
+        #endif
+        #ifdef USE_ADC_LEDX_I2C
+            else if (device == USE_ADC_LEDX_I2C)
+            {
+                const uint8_t cmd = data_in[driver_index][0];
+                if (cmd<=STM32_ADC_MAX_CMD_ID)
+                i2c_battery_getReply(cmd, ret, &length);
+                if ((cmd>=STM32_LEDX_MIN_CMD_ID)&&(cmd<=STM32_LEDX_MAX_CMD_ID))
+                i2c_ledx_getReply(cmd, ret, &length);
             }
         #endif
             // send reply values to master

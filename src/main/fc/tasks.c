@@ -48,6 +48,7 @@
 
 #include "drivers/i2c_rcout.h"
 #include "drivers/i2c_battery.h"
+#include "drivers/i2c_ledx.h"
 
 #include "config/config.h"
 #include "fc/core.h"
@@ -289,6 +290,14 @@ void taskUpdateI2CRcout(timeUs_t currentTimeUs)
 }
 #endif
 
+#if defined (USE_LEDX)
+void taskUpdateGpio(timeUs_t currentTimeUs)
+{
+    UNUSED(currentTimeUs);
+
+    i2c_ledx_execute();
+}
+#endif
 
 #if defined(USE_RANGEFINDER)
 void taskUpdateRangefinder(timeUs_t currentTimeUs)
@@ -413,6 +422,13 @@ task_attribute_t task_attributes[TASK_COUNT] = {
 
 #ifdef USE_RCOUT_I2C
     [TASK_I2CRCOUT] = DEFINE_TASK("I2CRCOUT", NULL, NULL, taskUpdateI2CRcout, TASK_PERIOD_HZ(10), TASK_PRIORITY_HIGH),
+#endif
+
+#ifdef USE_LEDX
+#ifndef LEDX_REFRESH_RATE
+#define LEDX_REFRESH_RATE   10
+#endif
+    [TASK_I2CLEDX] = DEFINE_TASK("I2CLEDX", NULL, NULL, taskUpdateGpio, TASK_PERIOD_HZ(LEDX_REFRESH_RATE), TASK_PRIORITY_HIGH),
 #endif
 
 #ifdef USE_GPS
@@ -579,6 +595,10 @@ void tasksInit(void)
     setTaskEnabled(TASK_I2CRCOUT, true);
 #endif
         
+#ifdef USE_LEDX
+    setTaskEnabled(TASK_I2CLEDX, true);
+#endif
+
 #ifdef USE_GPS
     setTaskEnabled(TASK_GPS, featureIsEnabled(FEATURE_GPS));
 #endif
