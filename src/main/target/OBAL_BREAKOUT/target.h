@@ -47,6 +47,7 @@
 #define BUTTON_A_PIN            PA0
 //#define USE_RCINPUT_I2C_PWM_DEBUG   0x01 // from 1 to total 4
 //#define DEBUG_ADC_CHANNELS
+//#define DEBUG_LEDX_COMMANDS_IN_CLI
 ///////END TASKS
 
 #define USE_CLI_DEBUG_PRINT
@@ -73,16 +74,18 @@
 
 
 #define USE_I2C
+
 #define USE_I2C_DEVICE_1
 #define I2C1_SDA                PB7
 #define I2C1_SCL                PB6
-#define I2C1_ADDRESS            0x66  // non zero address means slave
+#define I2C1_ADDRESS            0x27  // non zero address means slave
+#define I2C1_ADDRESS_2          0x66  // non zero address means slave
 
 
-#define USE_I2C_DEVICE_2
-#define I2C2_SDA                PB3
-#define I2C2_SCL                PB10
-#define I2C2_ADDRESS            0x27  // non zero address means slave
+// #define USE_I2C_DEVICE_2
+// #define I2C2_SDA                PB3
+// #define I2C2_SCL                PB10
+// #define I2C2_ADDRESS            0x27  // non zero address means slave
 
 
 #define USE_I2C_DEVICE_3
@@ -91,12 +94,10 @@
 #define I2C3_ADDRESS            0x33 // non zero address means slave
 #define I2C3_ADDRESS_2          0x48
 
-#define USE_RCOUT_I2C           I2CDEV_1
-#define USE_RCINPUT_I2C         I2CDEV_2
-//#define USE_ADC_I2C             I2CDEV_3
-//#define USE_LEDX_I2C            I2CDEV_3
-#define USE_ADC_LEDX_I2C        I2CDEV_3
-
+#define USE_RCINPUT_I2C         0x27
+#define USE_LEDX_I2C            0x33
+#define USE_ADC_I2C             0x48
+#define USE_RCOUT_I2C           0x66
 
 
 

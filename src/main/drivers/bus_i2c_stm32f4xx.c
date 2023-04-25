@@ -443,9 +443,9 @@ void I2C_clear_STOPF(I2C_TypeDef* I2Cx) {
 }
 
 #if (I2C1_ADDRESS != 0) || (I2C2_ADDRESS != 0) || (I2C3_ADDRESS != 0)
-    
-static uint8_t data_in[3][3];
-static uint8_t data_in_index[3];
+volatile uint16_t Address = 0x0;
+static uint8_t data_in[4][3];
+static uint8_t data_in_index[4];
 static uint8_t driver_index = 0;
 void i2c_ev_slave_handler(I2CDevice device)
 {
@@ -455,7 +455,20 @@ void i2c_ev_slave_handler(I2CDevice device)
     volatile uint32_t Event = I2C_GetLastEvent(I2Cx);
     uint16_t *I2C_SRX_ADDR = (uint16_t *)&Event;
 
-    switch (device)
+    if (I2C_SRX_ADDR[0] & I2C_SR1_ADDR) 
+    {
+        //7-bit address validation
+        if (I2Cx->SR2 & I2C_SR2_DUALF)
+        {   // secondary address called value is in (I2Cx->OAR2 >> 1)& 0xFE;
+            Address = (I2Cx->OAR2 >> 1)& 0x7F;   
+        }
+        else
+        {   // primary address called value is in (I2Cx->OAR1 >> 1)& 0xFE;
+            Address = (I2Cx->OAR1 >> 1)& 0x7F;   
+        }
+    }
+
+    switch (Address)
     {
     #ifdef USE_RCOUT_I2C
         case USE_RCOUT_I2C:
@@ -469,17 +482,17 @@ void i2c_ev_slave_handler(I2CDevice device)
     #endif
     #ifdef USE_LEDX_I2C
         case  USE_LEDX_I2C:
-            driver_index=1;
+            driver_index=2;
             break;
     #endif
-    #ifdef USE_ADC_LEDX_I2C
-        case  USE_ADC_LEDX_I2C:
-            driver_index=1;
-            break;
-    #endif
+    // #ifdef USE_ADC_LEDX_I2C
+    //     case  USE_ADC_LEDX_I2C:
+    //         driver_index=1;
+    //         break;
+    // #endif
     #ifdef USE_RCINPUT_I2C
         case  USE_RCINPUT_I2C:
-            driver_index=2;
+            driver_index=3;
             break;
     #endif
         default:
@@ -493,41 +506,39 @@ void i2c_ev_slave_handler(I2CDevice device)
     {
         I2C_clear_STOPF(I2Cx);
         
-    //     if (cliMode) {
-    //      volatile uint16_t Address1 = I2Cx->OAR1;
-    //      volatile uint16_t Address2 = I2Cx->OAR2;
-    //      char msg[80];
-    //      sprintf(msg,"set ADD %d - %d\n", Address1,Address2);
-    //      cliPrintLine(msg);
-    //  }
+        // if (cliMode) {
+        //  char msg[80];
+        //  sprintf(msg,"set  %x \n", Address);
+        //  cliPrintLine(msg);
+        // }
 
 #ifdef USE_RCOUT_I2C
-    if (device == USE_RCOUT_I2C)
+    if (Address == USE_RCOUT_I2C)
     {
         i2c_rcout_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
     }
 #endif
 #ifdef USE_ADC_I2C
-    if (device == USE_ADC_I2C)
+    if (Address == USE_ADC_I2C)
     {
         i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
     }
 #endif
 #ifdef USE_LEDX_I2C
-    if (device == USE_LEDX_I2C)
+    if (Address == USE_LEDX_I2C)
     {
         i2c_ledx_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
     }
 #endif
-#ifdef USE_ADC_LEDX_I2C
-    if (device == USE_ADC_LEDX_I2C)
-    {
-        i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
-        i2c_ledx_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
-    }
-#endif
+// #ifdef USE_ADC_LEDX_I2C
+//     if (device == USE_ADC_LEDX_I2C)
+//     {
+//         i2c_battery_parseCommand(data_in[driver_index][0], data_in[driver_index][1]);
+//         i2c_ledx_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
+//     }
+// #endif
 #ifdef USE_RCINPUT_I2C
-    if (device == USE_RCINPUT_I2C)
+    if (Address == USE_RCINPUT_I2C)
     {
         i2c_rcin_parseCommand(data_in[driver_index][0], (data_in[driver_index][2] << 8) | data_in[driver_index][1] );
     }
@@ -545,10 +556,12 @@ void i2c_ev_slave_handler(I2CDevice device)
         return ;
     }
 
+    
 
     if ((I2C_SRX_ADDR[0] & I2C_SR1_ADDR) 
       &&(I2C_SRX_ADDR[1] & I2C_SR2_BUSY))
     {
+
         
 		data_in_index[driver_index] = 0;
         memset (data_in[driver_index],0,3);
@@ -560,45 +573,44 @@ void i2c_ev_slave_handler(I2CDevice device)
             data_in[driver_index][data_in_index[driver_index]] = (uint8_t)I2Cx->DR;
             uint8_t ret[2] = {0,0};
             uint8_t length = 1;
+            
+        
+        
+        // if (cliMode) {
+        //  char msg[80];
+        //  //sprintf(msg,"set  %x - %x - %x \n", Address1,Address2,Address3);
+        //  sprintf(msg,"get  %x \n", Address);
+        //  cliPrintLine(msg);
+        // }
             if (false)
             {
                 return ;
             }
-            
         #ifdef USE_RCOUT_I2C
-            else if (device == USE_RCOUT_I2C)
+            else if (Address == USE_RCOUT_I2C)
             {
                 i2c_rcout_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_RCINPUT_I2C
-            else if (device == USE_RCINPUT_I2C)
+            else if (Address == USE_RCINPUT_I2C)
             {
                 i2c_rcin_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_ADC_I2C
-            else if (device == USE_ADC_I2C)
+            else if (Address == USE_ADC_I2C)
             {
                 i2c_battery_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
         #ifdef USE_LEDX_I2C
-            else if (device == USE_LEDX_I2C)
+            else if (Address == USE_LEDX_I2C)
             {
                 i2c_ledx_getReply(data_in[driver_index][0], ret, &length);
             }
         #endif
-        #ifdef USE_ADC_LEDX_I2C
-            else if (device == USE_ADC_LEDX_I2C)
-            {
-                const uint8_t cmd = data_in[driver_index][0];
-                if (cmd<=STM32_ADC_MAX_CMD_ID)
-                i2c_battery_getReply(cmd, ret, &length);
-                if ((cmd>=STM32_LEDX_MIN_CMD_ID)&&(cmd<=STM32_LEDX_MAX_CMD_ID))
-                i2c_ledx_getReply(cmd, ret, &length);
-            }
-        #endif
+        
             // send reply values to master
             for (int i=0;i<length;++i)
             {
@@ -624,6 +636,11 @@ void i2c_ev_slave_handler(I2CDevice device)
         }
         data_in[driver_index][data_in_index[driver_index]] = (uint8_t)I2Cx->DR;
         ++data_in_index[driver_index];
+        if (data_in_index[driver_index]==2)
+        {
+            // Clear RXNE flag
+            I2Cx->SR1 &= ~I2C_SR1_RXNE;  // receive no more.
+        }
     }
 }
 
