@@ -28,13 +28,13 @@
 #include "drivers/dma.h"
 
 const timerHardware_t timerHardware[USABLE_TIMER_CHANNEL_COUNT] = {
-        DEF_TIM(TIM3, CH2, PB5, TIM_USE_PWM  | TIM_USE_PPM, 0, 0), 
-        DEF_TIM(TIM3, CH1, PB4, TIM_USE_PWM, 0, 0),
-        DEF_TIM(TIM2, CH2, PB3, TIM_USE_PWM, 0, 0), 
-        DEF_TIM(TIM2, CH1, PA15, TIM_USE_PWM , 0, 0), 
-        DEF_TIM(TIM2, CH1, PA0, TIM_USE_MOTOR, 0, 0), 
-        DEF_TIM(TIM9, CH1, PA2, TIM_USE_MOTOR,   0, 0), 
-        DEF_TIM(TIM1, CH2N, PB14, TIM_USE_MOTOR, 0, 0), 
-        DEF_TIM(TIM2, CH3, PB10, TIM_USE_MOTOR, 0, 0) 
+        DEF_TIM(TIM3, CH2,  PB5,  TIM_USE_PPM,   0, 0), 
+        DEF_TIM(TIM2, CH1,  PA15, TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM1, CH1,  PA8,  TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM2, CH3,  PB10, TIM_USE_MOTOR, 0, 0) ,
+        DEF_TIM(TIM1, CH3N, PB1,  TIM_USE_MOTOR, 0, 0), 
+        DEF_TIM(TIM1, CH2N, PB0,  TIM_USE_SERVO, 0, 0),
+        DEF_TIM(TIM1, CH1N, PA7,  TIM_USE_SERVO, 0, 0),
+        DEF_TIM(TIM2, CH2,  PA1,  TIM_USE_SERVO, 0, 0)
         
 };
